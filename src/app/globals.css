@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@import "@quickadui/theme/tokens.css";
+@import "@quickadui/theme/tailwind-theme.css";
+@import "@quickadui/theme/scrollbar.css";
+
+/* Chemins relatifs à ce fichier : src/app/ -> ../../node_modules */
+@source "../../node_modules/@quickadui/primitives";
+@source "../../node_modules/@quickadui/core";
+@source "../../node_modules/@quickadui/forms";
+@source "../../node_modules/@quickadui/data";
+@source "../../node_modules/@quickadui/layout";
+@source "../../node_modules/@quickadui/overlays";
+@source "../../node_modules/@quickadui/shell";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  @apply bg-neutral-1 text-neutral-12 font-sans;
+}
