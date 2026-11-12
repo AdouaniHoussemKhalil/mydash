@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { publicEnv } from "@/lib/env";
-import { isPublicPath, LOGIN_PATH } from "@/features/auth/paths";
+import { HOME_PATH, isPublicPath, LOGIN_PATH } from "@/features/auth/paths";
 import type { Database } from "./database.types";
 
 /**
@@ -47,7 +47,7 @@ export async function updateSession(request: NextRequest) {
 
   if (isAuthenticated && pathname === LOGIN_PATH) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = HOME_PATH;
     url.search = "";
     return NextResponse.redirect(url);
   }
