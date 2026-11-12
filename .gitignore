@@ -42,3 +42,9 @@ next-env.d.ts
 
 # env : seul le modèle est versionné
 !.env.example
+
+# playwright
+/playwright-report/
+/test-results/
+/blob-report/
+/e2e/.auth/

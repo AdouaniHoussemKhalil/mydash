@@ -77,6 +77,34 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
 | `npm run typecheck` | Types de routes Next + `tsc --noEmit` |
 | `npm test` | Tests unitaires (Vitest) |
 | `npm run test:watch` | Vitest en mode watch |
+| `npm run test:e2e` | Tests e2e Playwright (build + démarrage automatiques) |
+
+### Tests e2e
+
+Prérequis : Supabase local démarré (`npm run db:start`), `.env.local` rempli et Chromium installé une fois (`npx playwright install chromium`).
+
+`npm run test:e2e` construit l'app, la démarre sur le port 3000, puis lance les tests :
+- **Projet `setup`** : crée un compte de test et enregistre sa session dans `e2e/.auth/` (non versionné).
+- **Projet `desktop`** : parcours capture → recherche, dans `e2e/capture.spec.ts`.
+- **Projet `mobile`** : parcours sur Pixel 7, dans `e2e/mobile.spec.ts`.
+
+La CI les exécute dans le job `e2e`, avec un Supabase allégé (base, auth, API).
+
+## Raccourcis clavier
+
+| Touche | Action |
+|---|---|
+| `Ctrl` / `Cmd` + `K` | Palette : capturer (type détecté), aller à une page, retrouver un élément |
+| `↑` `↓` `Entrée` | Choisir et valider dans la palette |
+| `Échap` | Quitter le champ, puis fermer le détail ou la palette |
+| `?` | Aide des raccourcis |
+
+Dans la palette, la saisie est interprétée ainsi :
+- une URL GitHub ou GitLab de dépôt donne un **repo** ;
+- toute autre URL donne un **lien** ;
+- un texte donne une **note** : la première ligne sert de titre.
+
+Le nom exact d'une page, par exemple « inbox », ouvre cette page.
 
 ## Variables d'environnement
 
