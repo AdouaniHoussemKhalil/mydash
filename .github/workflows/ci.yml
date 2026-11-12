@@ -46,3 +46,28 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  database:
+    name: Migrations et tests RLS
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: 3.1.0
+
+      - name: Démarrer Postgres et appliquer les migrations
+        run: supabase db start
+
+      - name: Lint SQL
+        run: supabase db lint --level warning --fail-on warning
+
+      - name: Tests pgTAP
+        run: supabase test db
+
+      - name: Types TypeScript à jour
+        run: |
+          supabase gen types typescript --local --schema public > /tmp/database.types.ts
+          diff -u src/lib/supabase/database.types.ts /tmp/database.types.ts

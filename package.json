@@ -9,7 +9,14 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node scripts/vitest.mjs run",
-    "test:watch": "node scripts/vitest.mjs"
+    "test:watch": "node scripts/vitest.mjs",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "db:lint": "supabase db lint --level warning",
+    "db:types": "supabase gen types typescript --local --schema public > src/lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@quickadui/core": "^0.2.1",
@@ -40,6 +47,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "jsdom": "^29.1.1",
+    "supabase": "^3.1.0",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
     "vitest": "^5.1.0"
