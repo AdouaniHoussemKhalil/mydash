@@ -11,6 +11,7 @@ import {
   IconButton,
 } from "@/components/ui/core";
 import { type ThemeMode, useTheme } from "@/components/ui/theme";
+import { useIsClient } from "@/hooks/useIsClient";
 
 const OPTIONS: { value: ThemeMode; label: string }[] = [
   { value: "light", label: "Clair" },
@@ -24,7 +25,10 @@ function isThemeMode(value: string): value is ThemeMode {
 
 export function ThemeMenu() {
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const Icon = theme === "system" ? Monitor : resolvedTheme === "dark" ? Moon : Sun;
+  // Le thème mémorisé n'est connu que du navigateur : icône neutre jusqu'au
+  // montage pour ne pas diverger du HTML serveur (erreur d'hydratation).
+  const isClient = useIsClient();
+  const Icon = !isClient || theme === "system" ? Monitor : resolvedTheme === "dark" ? Moon : Sun;
 
   return (
     <DropdownMenu>

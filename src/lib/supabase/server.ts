@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { publicEnv } from "@/lib/env";
 import type { Database } from "./database.types";
 
@@ -9,6 +10,9 @@ import type { Database } from "./database.types";
  * À créer à chaque requête, jamais en variable globale.
  */
 export async function createClient() {
+  // Toujours à la requête : supabase-js lit l'heure (expiration du JWT),
+  // ce que Cache Components interdit pendant un prérendu.
+  await connection();
   const cookieStore = await cookies();
   const env = publicEnv();
 

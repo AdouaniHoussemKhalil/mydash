@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/EmptyState";
+import { ItemDetail } from "@/features/items";
 import { CollectionView } from "@/features/shell";
 
 export const metadata: Metadata = { title: "Recherche" };
@@ -12,6 +13,7 @@ export default function SearchPage({ searchParams }: PageProps<"/search">) {
       description="Recherche plein texte sur tous tes éléments."
       icon={<Search />}
       searchParams={searchParams}
+      renderDetail={(id) => <ItemDetail id={id} />}
       renderContent={() => (
         <EmptyState
           icon={<Search />}

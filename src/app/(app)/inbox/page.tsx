@@ -1,6 +1,7 @@
 import { Inbox } from "lucide-react";
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/EmptyState";
+import { ItemDetail } from "@/features/items";
 import { CollectionView } from "@/features/shell";
 
 export const metadata: Metadata = { title: "Inbox" };
@@ -12,6 +13,7 @@ export default function InboxPage({ searchParams }: PageProps<"/inbox">) {
       description="Éléments capturés, pas encore classés."
       icon={<Inbox />}
       searchParams={searchParams}
+      renderDetail={(id) => <ItemDetail id={id} />}
       renderContent={() => (
         <EmptyState
           icon={<Inbox />}

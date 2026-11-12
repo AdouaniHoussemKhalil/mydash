@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { publicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 import { authErrorMessage } from "./errors";
-import { LOGIN_PATH, safeNextPath } from "./paths";
+import { HOME_PATH, LOGIN_PATH, safeNextPath } from "./paths";
 import { authModeSchema, credentialsSchema } from "./schemas";
 
 export type AuthActionResult = { ok: false; error: string } | { ok: true; message: string };
@@ -52,7 +52,7 @@ export async function signInWithGitHub(formData: FormData): Promise<void> {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: callbackUrl(typeof next === "string" ? next : "/"),
+      redirectTo: callbackUrl(typeof next === "string" ? next : HOME_PATH),
       scopes: "read:user user:email",
     },
   });

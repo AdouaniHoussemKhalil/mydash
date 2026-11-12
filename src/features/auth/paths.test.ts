@@ -16,10 +16,10 @@ describe("safeNextPath", () => {
     expect(safeNextPath("/inbox?view=cards")).toBe("/inbox?view=cards");
   });
 
-  it.each([null, undefined, "", "https://evil.test", "//evil.test", "/\\evil.test", "inbox"])(
-    "refuse %s",
+  it.each([null, undefined, "", "/", "https://evil.test", "//evil.test", "/\\evil.test", "inbox"])(
+    "%s → /today",
     (next) => {
-      expect(safeNextPath(next)).toBe("/");
+      expect(safeNextPath(next)).toBe("/today");
     },
   );
 });
