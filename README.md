@@ -42,6 +42,22 @@ Le projet utilise les ports **55320 à 55329**, ce qui lui permet de tourner en 
 
 Nouvelle migration : `npx supabase migration new <nom>`, puis `npm run db:reset`, `npm run db:types` et `npm run db:test`.
 
+### Authentification
+
+L'authentification passe par Supabase Auth, par **e-mail + mot de passe** (10 caractères minimum) ou par **GitHub OAuth**.
+- **Fichier `src/proxy.ts`** : rafraîchit la session à chaque requête et redirige vers `/login?next=…` toute page protégée.
+- **Côté serveur**, l'utilisateur est lu via `getCurrentUser()` (`src/features/auth/session.ts`), qui valide le JWT avec `getClaims()`.
+- En local, la confirmation par e-mail est désactivée. Les e-mails partent dans Inbucket.
+
+**Activer GitHub en local**, une seule fois :
+1. Créer une OAuth App sur https://github.com/settings/developers :
+   - *Homepage URL* : `http://localhost:3000`
+   - *Authorization callback URL* : `http://127.0.0.1:55321/auth/v1/callback`
+2. Copier `supabase/.env.example` vers `supabase/.env`, puis y renseigner le *Client ID* et un *Client secret*. Ce fichier n'est pas commité.
+3. Relancer Supabase : `npm run db:stop && npm run db:start`.
+
+Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue, et renvoie vers `/login?error=oauth`.
+
 ### Modèle de données
 
 - Toute donnée appartient à un **workspace**. À l'inscription, un workspace « Personnel » est créé automatiquement, avec l'utilisateur comme `owner`.
