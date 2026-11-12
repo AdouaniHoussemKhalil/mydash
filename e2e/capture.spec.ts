@@ -65,7 +65,8 @@ test.describe("capture → recherche", () => {
 
   test("« ? » affiche l'aide des raccourcis", async ({ page }) => {
     await page.goto("/today");
-    await page.locator("main h1").click();
+    // Pendant le streaming, le squelette et la page ont chacun un h1 : viser le visible.
+    await page.locator("main h1").filter({ visible: true }).first().click();
     await page.keyboard.press("?");
     await expect(page.getByRole("dialog", { name: "Raccourcis clavier" })).toBeVisible();
   });

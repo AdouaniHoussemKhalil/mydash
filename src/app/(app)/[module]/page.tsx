@@ -2,7 +2,8 @@ import { Archive } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
+import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
 import { ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
 import { listTags, TagFilter } from "@/features/tags";
@@ -26,7 +27,29 @@ export async function generateMetadata({ params }: PageProps<"/[module]">): Prom
   return { title: getModule(slug)?.label ?? "Introuvable" };
 }
 
-export default async function ModulePage({ params, searchParams }: PageProps<"/[module]">) {
+// params est lu sous Suspense : la coquille de la page ne dépend pas de l'URL
+// (prérendu partagé par tous les modules, navigation instantanée).
+export default function ModulePage({ params, searchParams }: PageProps<"/[module]">) {
+  return (
+    <Suspense fallback={<ModuleSkeleton />}>
+      <ModuleContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+function ModuleSkeleton() {
+  return (
+    <main className="min-w-0 flex-1 overflow-y-auto">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 md:px-6" aria-busy="true" aria-label="Chargement">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    </main>
+  );
+}
+
+async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
   const { module: slug } = await params;
   const definition = MODULES.find((module) => module.slug === slug);
   if (!definition) notFound();
