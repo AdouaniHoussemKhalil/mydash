@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/EmptyState";
-import { CollectionView, getModule, MODULE_ICONS, MODULES } from "@/features/shell";
+import { ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
+import { CollectionView, getModule, MODULE_ICONS, MODULES, type ViewMode } from "@/features/shell";
 
 // Modules connus prérendus ; tout autre segment → notFound() plus bas.
 export function generateStaticParams() {
@@ -26,13 +27,39 @@ export default async function ModulePage({ params, searchParams }: PageProps<"/[
       description={definition.description}
       icon={<Icon />}
       searchParams={searchParams}
-      renderContent={() => (
-        <EmptyState
-          icon={<Icon />}
-          title={`Aucun élément dans ${definition.label}`}
-          description="Capture ton premier élément avec Ctrl+K."
-        />
+      renderContent={(view, selectedId) => (
+        <>
+          <QuickCreate type={definition.type} itemLabel={definition.itemLabel} />
+          <ModuleItems
+            type={definition.type}
+            view={view}
+            selectedId={selectedId}
+            empty={
+              <EmptyState
+                icon={<Icon />}
+                title={`Aucun élément dans ${definition.label}`}
+                description="Tape un titre ci-dessus, ou capture depuis n'importe où avec Ctrl+K."
+              />
+            }
+          />
+        </>
       )}
+      renderDetail={(id) => <ItemDetail id={id} />}
     />
   );
+}
+
+async function ModuleItems({
+  type,
+  view,
+  selectedId,
+  empty,
+}: {
+  type: (typeof MODULES)[number]["type"];
+  view: ViewMode;
+  selectedId: string | undefined;
+  empty: React.ReactNode;
+}) {
+  const items = await listItems({ type });
+  return <ItemsView items={items} view={view} selectedId={selectedId} empty={empty} />;
 }

@@ -12,8 +12,8 @@ export type CollectionViewProps = {
   description?: string | undefined;
   icon?: ReactNode | undefined;
   searchParams: SearchParams;
-  /** Contenu central selon la vue choisie. */
-  renderContent: (view: ViewMode) => ReactNode;
+  /** Contenu central selon la vue choisie et l'item sélectionné. */
+  renderContent: (view: ViewMode, selectedId: string | undefined) => ReactNode;
   /** Contenu du panneau détail pour l'item sélectionné (?item=). */
   renderDetail?: ((itemId: string) => ReactNode) | undefined;
 };
@@ -49,7 +49,7 @@ async function CollectionContent({
       <main className="min-w-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 md:px-6">
           <PageHeader title={title} description={description} icon={icon} actions={<ViewSwitcher value={view} />} />
-          {renderContent(view)}
+          {renderContent(view, itemId)}
         </div>
       </main>
       {itemId && renderDetail && (
