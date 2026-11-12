@@ -155,7 +155,13 @@ export function CommandPalette() {
       icon: <Plus />,
       run: () =>
         startTransition(async () => {
-          const result = await createItem({ type: detected.type, title: detected.title, body: detected.body });
+          const result = await createItem({
+            type: detected.type,
+            title: detected.title,
+            body: detected.body,
+            // Les repos gardent l'URL dans le contenu tant que leur module n'est pas fait.
+            ...(detected.type === "link" ? { url: detected.url } : {}),
+          });
           if (!result.ok) {
             toast({ title: result.error, variant: "danger" });
             return;

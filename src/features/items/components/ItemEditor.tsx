@@ -12,6 +12,7 @@ import { type Draft, draftPatch } from "../draft";
 import type { Item, UpdateItemInput } from "../schemas";
 import { DeleteItemButton } from "./DeleteItemButton";
 import { ItemTypeBadge } from "./ItemTypeBadge";
+import { LinkFields } from "./LinkFields";
 
 const AUTOSAVE_DELAY_MS = 600;
 
@@ -177,6 +178,8 @@ export function ItemEditor({ item, relations }: { item: Item; relations?: ReactN
         {titleEmpty && <p className="px-2 text-xs text-danger-11">Le titre est obligatoire.</p>}
       </div>
 
+      {item.type === "link" && <LinkFields item={item} />}
+
       <div className="flex flex-col gap-1">
         <label htmlFor={`body-${item.id}`} className="sr-only">
           Contenu
@@ -186,7 +189,7 @@ export function ItemEditor({ item, relations }: { item: Item; relations?: ReactN
           value={draft.body}
           onChange={(event) => schedule({ ...draft, body: event.target.value })}
           onBlur={save}
-          placeholder="Écris ici… (Markdown)"
+          placeholder={item.type === "link" ? "Tes notes sur ce lien… (Markdown)" : "Écris ici… (Markdown)"}
           className="field-sizing-content min-h-40 resize-y font-mono text-sm"
         />
       </div>

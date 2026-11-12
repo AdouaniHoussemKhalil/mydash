@@ -28,6 +28,9 @@ test.describe("capture → recherche", () => {
     await expect(page.getByRole("option", { name: /Lien : example\.com\/article/ })).toBeVisible();
     await input.press("Enter");
     await expect(page).toHaveURL(/\/links\?item=/);
+    await expect(page.getByRole("complementary", { name: /Détail/ }).getByLabel("URL")).toHaveValue(
+      "https://example.com/article",
+    );
 
     // Retrouver par préfixe, sans accent exact sur le début du mot
     input = await openPalette(page);

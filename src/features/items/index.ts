@@ -1,4 +1,4 @@
-export { createItem, deleteItem, quickSearch, updateItem } from "./actions";
+export { createItem, deleteItem, quickSearch, setLinkRead, updateItem } from "./actions";
 export { ItemDetail } from "./components/ItemDetail";
 export { ItemsView, type ItemsViewProps } from "./components/ItemsView";
 export { ItemTypeBadge } from "./components/ItemTypeBadge";
