@@ -81,6 +81,37 @@ export async function deleteItem(id: unknown): Promise<ActionResult> {
   return { ok: true, data: undefined };
 }
 
+/**
+ * Statut de lecture d'un lien. La ligne link_meta est créée à la première
+ * utilisation : on met à jour, sinon on insère (workspace de l'item).
+ */
+export async function setLinkRead(id: unknown, isRead: unknown): Promise<ActionResult> {
+  const parsedId = itemIdSchema.safeParse(id);
+  const parsedRead = z.boolean().safeParse(isRead);
+  if (!parsedId.success || !parsedRead.success) return { ok: false, error: "Données invalides" };
+
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data: updated, error } = await supabase
+    .from("link_meta")
+    .update({ is_read: parsedRead.data })
+    .eq("workspace_id", workspaceId)
+    .eq("item_id", parsedId.data)
+    .select("item_id");
+  if (error) return { ok: false, error: "Enregistrement impossible. Réessaie." };
+
+  if (updated.length === 0) {
+    // La clé étrangère composite garantit que l'item est bien dans ce workspace.
+    const { error: insertError } = await supabase
+      .from("link_meta")
+      .insert({ item_id: parsedId.data, workspace_id: workspaceId, is_read: parsedRead.data });
+    if (insertError) return { ok: false, error: "Élément introuvable ou accès refusé" };
+  }
+
+  refresh();
+  return { ok: true, data: undefined };
+}
+
 const searchQuerySchema = z.string().trim().min(1).max(200);
 
 /** Recherche rapide pour la palette (lecture seule). */

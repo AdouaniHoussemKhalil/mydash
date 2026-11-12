@@ -1,4 +1,7 @@
 import type { ItemType } from "@/features/shell";
+import { parseUrl, urlTitle } from "@/lib/url";
+
+export { parseUrl };
 
 export type RepoRef = { provider: "github" | "gitlab"; owner: string; name: string };
 
@@ -14,43 +17,6 @@ const GITHUB_RESERVED = new Set([
   "about", "apps", "collections", "explore", "features", "issues", "login", "marketplace",
   "notifications", "orgs", "pricing", "pulls", "search", "settings", "sponsors", "topics", "trending",
 ]);
-
-/**
- * Extensions de fichier courantes : « README.md » ou « notes.txt » sans
- * schéma désignent un fichier, même si .md ou .py sont aussi des TLD.
- */
-const FILE_EXTENSIONS = new Set([
-  "txt", "md", "pdf", "doc", "docx", "xls", "xlsx", "csv", "json", "yaml", "yml", "xml", "html",
-  "css", "js", "jsx", "ts", "tsx", "py", "rb", "go", "rs", "java", "sh", "sql", "png", "jpg",
-  "jpeg", "gif", "svg", "webp", "zip", "tar", "gz", "log", "env", "lock", "toml",
-]);
-
-/**
- * Interprète une saisie comme une URL. Accepte « https://… » et les formes
- * courtes « www.exemple.com » ou « exemple.com/chemin » (sans espace).
- */
-export function parseUrl(input: string): URL | null {
-  const value = input.trim();
-  if (!value || /\s/.test(value)) return null;
-
-  let withScheme: string | null = null;
-  if (/^https?:\/\//i.test(value)) {
-    withScheme = value;
-  } else {
-    const bare = /^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.([a-z]{2,})(:\d+)?([/?#]|$)/i.exec(value);
-    const tld = bare?.[3]?.toLowerCase();
-    const isFileName = !bare?.[1] && tld !== undefined && FILE_EXTENSIONS.has(tld) && !/[/?#]/.test(value);
-    if (bare && !isFileName) withScheme = `https://${value}`;
-  }
-  if (!withScheme) return null;
-
-  try {
-    const url = new URL(withScheme);
-    return url.hostname.includes(".") || url.hostname === "localhost" ? url : null;
-  } catch {
-    return null;
-  }
-}
 
 /** github.com/owner/repo(/…) ou gitlab.com/group/project(/-/…) → dépôt. */
 export function parseRepo(url: URL): RepoRef | null {
@@ -79,12 +45,6 @@ function truncate(text: string, max = TITLE_MAX) {
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
 
-/** Titre lisible d'un lien en attendant les métadonnées (Phase 1). */
-function linkTitle(url: URL) {
-  const path = url.pathname === "/" ? "" : url.pathname.replace(/\/$/, "");
-  return truncate(`${url.hostname.replace(/^www\./, "")}${decodeURIComponent(path)}`);
-}
-
 /**
  * Champ unique de la palette : URL de dépôt → repo, autre URL → lien,
  * texte → note (première ligne = titre, le reste = contenu).
@@ -98,7 +58,7 @@ export function detectCapture(input: string): Capture | null {
     const href = url.toString();
     const repo = parseRepo(url);
     if (repo) return { type: "repo", title: `${repo.owner}/${repo.name}`, body: href, url: href, repo };
-    return { type: "link", title: linkTitle(url), body: href, url: href };
+    return { type: "link", title: urlTitle(url, TITLE_MAX), body: "", url: href };
   }
 
   const [firstLine = "", ...rest] = value.split(/\r?\n/);

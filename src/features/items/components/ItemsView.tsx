@@ -1,7 +1,7 @@
-import { Pin } from "lucide-react";
+import { ExternalLink, Pin } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/core";
+import { Badge, Card, CardContent, CardHeader, CardTitle, IconButton } from "@/components/ui/core";
 import {
   Table,
   TableBody,
@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/data";
 import type { ViewMode } from "@/features/shell";
 import { excerpt, formatDateTime, formatRelative } from "@/lib/format";
+import { displayHost } from "@/lib/url";
 import { cn } from "@quickadui/utils";
-import type { Item } from "../schemas";
+import { type Item, isRead } from "../schemas";
 import { ItemTypeBadge } from "./ItemTypeBadge";
 
 export type ItemsViewProps = {
@@ -47,6 +48,33 @@ function PinMark({ pinned }: { pinned: boolean }) {
   return <Pin className="size-3.5 shrink-0 text-accent-11" aria-label="Épinglé" />;
 }
 
+/** Sous-titre : hôte du lien, sinon extrait du contenu. */
+function subtitle(item: Item, length?: number) {
+  if (item.url) return displayHost(item.url) ?? item.url;
+  return item.body ? excerpt(item.body, length) : null;
+}
+
+/** Ouvre le site dans un nouvel onglet (hors du lien vers le détail). */
+function OpenSite({ item, className }: { item: Item; className?: string | undefined }) {
+  if (!item.url) return null;
+  return (
+    <IconButton asChild variant="ghost" size="sm" aria-label={`Ouvrir ${displayHost(item.url) ?? "le site"} dans un nouvel onglet`} className={className}>
+      <a href={item.url} target="_blank" rel="noopener noreferrer">
+        <ExternalLink className="size-4" />
+      </a>
+    </IconButton>
+  );
+}
+
+function ToRead({ item }: { item: Item }) {
+  if (item.type !== "link" || isRead(item)) return null;
+  return (
+    <Badge variant="soft" className="shrink-0">
+      À lire
+    </Badge>
+  );
+}
+
 export function ItemsView({ items, view, selectedId, empty, showType = false, linkParams }: ItemsViewProps) {
   const href = (id: string) => detailHref(view, id, linkParams);
   if (items.length === 0) return <>{empty}</>;
@@ -55,7 +83,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
     return (
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <li key={item.id}>
+          <li key={item.id} className="relative">
             <Link href={href(item.id)} scroll={false} className="block h-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent-8">
               <Card
                 className={cn(
@@ -66,16 +94,20 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                 <CardHeader className="gap-2">
                   <div className="flex items-center justify-between gap-2">
                     {showType ? <ItemTypeBadge type={item.type} /> : <span />}
-                    <PinMark pinned={item.pinned} />
+                    <span className="flex items-center gap-2">
+                      <ToRead item={item} />
+                      <PinMark pinned={item.pinned} />
+                    </span>
                   </div>
                   <CardTitle className="line-clamp-2 text-base">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
-                  {item.body && <p className="line-clamp-3 text-sm text-neutral-11">{excerpt(item.body)}</p>}
+                  {subtitle(item) && <p className="line-clamp-3 text-sm break-words text-neutral-11">{subtitle(item)}</p>}
                   <Updated date={item.updated_at} />
                 </CardContent>
               </Card>
             </Link>
+            <OpenSite item={item} className="absolute right-3 bottom-3" />
           </li>
         ))}
       </ul>
@@ -97,10 +129,14 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             {items.map((item) => (
               <TableRow key={item.id} selected={item.id === selectedId}>
                 <TableCell className="max-w-0 w-full">
-                  <Link href={href(item.id)} scroll={false} className="flex items-center gap-2 font-medium text-neutral-12 hover:underline">
-                    <PinMark pinned={item.pinned} />
-                    <span className="truncate">{item.title}</span>
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link href={href(item.id)} scroll={false} className="flex min-w-0 items-center gap-2 font-medium text-neutral-12 hover:underline">
+                      <PinMark pinned={item.pinned} />
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                    <ToRead item={item} />
+                    <OpenSite item={item} />
+                  </div>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   <ItemTypeBadge type={item.type} />
@@ -119,21 +155,22 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
   return (
     <ul className="flex flex-col divide-y divide-neutral-6 rounded-lg border border-neutral-6">
       {items.map((item) => (
-        <li key={item.id}>
+        <li
+          key={item.id}
+          className={cn("flex items-center transition-colors hover:bg-neutral-2", item.id === selectedId && "bg-accent-2")}
+        >
           <Link
             href={href(item.id)}
             scroll={false}
             aria-current={item.id === selectedId ? "true" : undefined}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 transition-colors hover:bg-neutral-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-8",
-              item.id === selectedId && "bg-accent-2",
-            )}
+            className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-8"
           >
             <PinMark pinned={item.pinned} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-neutral-12">{item.title}</p>
-              {item.body && <p className="truncate text-sm text-neutral-11">{excerpt(item.body, 120)}</p>}
+              {subtitle(item, 120) && <p className="truncate text-sm text-neutral-11">{subtitle(item, 120)}</p>}
             </div>
+            <ToRead item={item} />
             {showType && (
               <span className="hidden sm:inline-flex">
                 <ItemTypeBadge type={item.type} />
@@ -141,6 +178,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             )}
             <Updated date={item.updated_at} />
           </Link>
+          <OpenSite item={item} className="mr-2" />
         </li>
       ))}
     </ul>

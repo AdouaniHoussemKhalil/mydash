@@ -6,6 +6,7 @@ import { type FormEvent, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/core";
 import { Input } from "@/components/ui/forms";
 import { withSearchParams } from "@/features/shell";
+import { parseUrl, urlTitle } from "@/lib/url";
 import { createItem } from "../actions";
 import type { Item } from "../schemas";
 
@@ -29,7 +30,11 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
     if (!title.trim()) return;
     setError(null);
     startTransition(async () => {
-      const result = await createItem({ type, title });
+      // Module Liens : une URL collée devient l'URL du lien, avec un titre lisible.
+      const url = type === "link" ? parseUrl(title) : null;
+      const result = await createItem(
+        url ? { type, title: urlTitle(url), url: url.toString() } : { type, title },
+      );
       if (!result.ok) {
         setError(result.error);
         return;
@@ -51,10 +56,12 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
           ref={inputRef}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder={`${itemLabel} : un titre suffit, puis Entrée`}
+          placeholder={
+            type === "link" ? "Lien : colle une URL (ou un titre), puis Entrée" : `${itemLabel} : un titre suffit, puis Entrée`
+          }
           aria-label={label}
           aria-invalid={error ? true : undefined}
-          maxLength={500}
+          maxLength={type === "link" ? 2048 : 500}
           startIcon={<Plus className="size-4" />}
           disabled={isPending}
         />

@@ -42,6 +42,23 @@ describe("updateItemSchema", () => {
   });
 });
 
+describe("url", () => {
+  it("normalise une URL courte", () => {
+    expect(createItemSchema.parse({ type: "link", title: "x", url: " exemple.com/a " }).url).toBe(
+      "https://exemple.com/a",
+    );
+  });
+
+  it("refuse un schéma autre que http(s)", () => {
+    expect(updateItemSchema.safeParse({ url: "javascript:alert(1)" }).success).toBe(false);
+  });
+
+  it("une chaîne vide ou null efface l'URL", () => {
+    expect(updateItemSchema.parse({ url: "" })).toEqual({ url: null });
+    expect(updateItemSchema.parse({ url: null })).toEqual({ url: null });
+  });
+});
+
 describe("itemIdSchema", () => {
   it("accepte un uuid et refuse le reste", () => {
     expect(itemIdSchema.safeParse("0b9f8a5e-2c1d-4b7a-9e3f-1a2b3c4d5e6f").success).toBe(true);

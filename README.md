@@ -66,6 +66,7 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
   - `workspace_id` et `created_by` ne sont pas modifiables par le client ;
   - des clés étrangères composites empêchent de relier des éléments de workspaces différents.
 - `items` est la table centrale commune à tous les types. Elle contient la colonne `search_vector` (générée automatiquement, avec un index GIN) et la colonne `embedding`, réservée à la recherche sémantique.
+- Une colonne `url` (http ou https uniquement, contrôlé en base) porte l'adresse des liens. Les données propres aux liens (statut lu / à lire) sont dans `link_meta`, en relation 1-1 avec `items`.
 
 ## Scripts
 

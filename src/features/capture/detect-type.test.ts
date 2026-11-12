@@ -40,7 +40,7 @@ describe("detectCapture", () => {
       expect(detectCapture("https://nextjs.org/docs/app/")).toEqual({
         type: "link",
         title: "nextjs.org/docs/app",
-        body: "https://nextjs.org/docs/app/",
+        body: "",
         url: "https://nextjs.org/docs/app/",
       });
     });
