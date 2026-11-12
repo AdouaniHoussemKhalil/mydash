@@ -1,0 +1,3 @@
+-- Données de développement local (appliquées par `npm run db:reset`).
+-- Les utilisateurs se créent via l'inscription : le trigger handle_new_user
+-- leur attribue automatiquement un workspace « Personnel ».
