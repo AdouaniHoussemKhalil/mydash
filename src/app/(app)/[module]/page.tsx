@@ -1,8 +1,18 @@
+import { Archive } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
-import { CollectionView, getModule, MODULE_ICONS, MODULES, type ViewMode } from "@/features/shell";
+import {
+  CollectionView,
+  getModule,
+  MODULE_ICONS,
+  MODULES,
+  type ModuleDef,
+  type ViewMode,
+} from "@/features/shell";
 
 // Modules connus prérendus ; tout autre segment → notFound() plus bas.
 export function generateStaticParams() {
@@ -27,39 +37,69 @@ export default async function ModulePage({ params, searchParams }: PageProps<"/[
       description={definition.description}
       icon={<Icon />}
       searchParams={searchParams}
-      renderContent={(view, selectedId) => (
-        <>
-          <QuickCreate type={definition.type} itemLabel={definition.itemLabel} />
-          <ModuleItems
-            type={definition.type}
-            view={view}
-            selectedId={selectedId}
-            empty={
-              <EmptyState
-                icon={<Icon />}
-                title={`Aucun élément dans ${definition.label}`}
-                description="Tape un titre ci-dessus, ou capture depuis n'importe où avec Ctrl+K."
-              />
-            }
-          />
-        </>
-      )}
       renderDetail={(id) => <ItemDetail id={id} />}
+      renderContent={(view, selectedId, query) => {
+        const archived = query.archived === "1";
+        return (
+          <>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div className="flex-1">
+                {!archived && <QuickCreate type={definition.type} itemLabel={definition.itemLabel} />}
+                {archived && <p className="text-sm text-neutral-11">Éléments archivés de {definition.label}.</p>}
+              </div>
+              <Link
+                href={archived ? `/${definition.slug}` : `/${definition.slug}?archived=1`}
+                className="inline-flex items-center gap-1.5 self-start rounded-md px-2 py-2 text-sm text-neutral-11 hover:bg-neutral-3 hover:text-neutral-12"
+              >
+                <Archive className="size-4" aria-hidden />
+                {archived ? "Retour aux éléments actifs" : "Archives"}
+              </Link>
+            </div>
+            <ModuleItems
+              definition={definition}
+              view={view}
+              selectedId={selectedId}
+              archived={archived}
+              empty={
+                archived ? (
+                  <EmptyState icon={<Archive />} title="Aucun élément archivé" />
+                ) : (
+                  <EmptyState
+                    icon={<Icon />}
+                    title={`Aucun élément dans ${definition.label}`}
+                    description="Tape un titre ci-dessus, ou capture depuis n'importe où avec Ctrl+K."
+                  />
+                )
+              }
+            />
+          </>
+        );
+      }}
     />
   );
 }
 
 async function ModuleItems({
-  type,
+  definition,
   view,
   selectedId,
+  archived,
   empty,
 }: {
-  type: (typeof MODULES)[number]["type"];
+  definition: ModuleDef;
   view: ViewMode;
   selectedId: string | undefined;
-  empty: React.ReactNode;
+  archived: boolean;
+  empty: ReactNode;
 }) {
-  const items = await listItems({ type });
-  return <ItemsView items={items} view={view} selectedId={selectedId} empty={empty} />;
+  const items = await listItems({ type: definition.type, archived });
+  return (
+    <ItemsView
+      items={items}
+      view={view}
+      selectedId={selectedId}
+      empty={empty}
+      linkParams={archived ? { archived: "1" } : undefined}
+    />
+  );
 }

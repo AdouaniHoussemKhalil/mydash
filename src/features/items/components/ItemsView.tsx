@@ -24,10 +24,12 @@ export type ItemsViewProps = {
   empty: ReactNode;
   /** Afficher le type (pages multi-types : Aujourd'hui, Inbox…). */
   showType?: boolean | undefined;
+  /** Paramètres d'URL à conserver dans les liens (ex. archived=1). */
+  linkParams?: Record<string, string> | undefined;
 };
 
-function detailHref(view: ViewMode, id: string) {
-  const params = new URLSearchParams({ item: id });
+function detailHref(view: ViewMode, id: string, extra: Record<string, string> = {}) {
+  const params = new URLSearchParams({ ...extra, item: id });
   if (view !== "list") params.set("view", view);
   return `?${params.toString()}`;
 }
@@ -45,7 +47,8 @@ function PinMark({ pinned }: { pinned: boolean }) {
   return <Pin className="size-3.5 shrink-0 text-accent-11" aria-label="Épinglé" />;
 }
 
-export function ItemsView({ items, view, selectedId, empty, showType = false }: ItemsViewProps) {
+export function ItemsView({ items, view, selectedId, empty, showType = false, linkParams }: ItemsViewProps) {
+  const href = (id: string) => detailHref(view, id, linkParams);
   if (items.length === 0) return <>{empty}</>;
 
   if (view === "cards") {
@@ -53,7 +56,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false }: 
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
           <li key={item.id}>
-            <Link href={detailHref(view, item.id)} scroll={false} className="block h-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent-8">
+            <Link href={href(item.id)} scroll={false} className="block h-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent-8">
               <Card
                 className={cn(
                   "h-full transition-colors hover:border-neutral-8",
@@ -94,7 +97,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false }: 
             {items.map((item) => (
               <TableRow key={item.id} selected={item.id === selectedId}>
                 <TableCell className="max-w-0 w-full">
-                  <Link href={detailHref(view, item.id)} scroll={false} className="flex items-center gap-2 font-medium text-neutral-12 hover:underline">
+                  <Link href={href(item.id)} scroll={false} className="flex items-center gap-2 font-medium text-neutral-12 hover:underline">
                     <PinMark pinned={item.pinned} />
                     <span className="truncate">{item.title}</span>
                   </Link>
@@ -118,7 +121,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false }: 
       {items.map((item) => (
         <li key={item.id}>
           <Link
-            href={detailHref(view, item.id)}
+            href={href(item.id)}
             scroll={false}
             aria-current={item.id === selectedId ? "true" : undefined}
             className={cn(
