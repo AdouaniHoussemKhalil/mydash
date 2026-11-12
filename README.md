@@ -85,3 +85,4 @@ Les composants QuickadUI ne déclarent pas `"use client"` : on les importe **tou
 - Une issue = une branche (`feature/…` ou `fix/…` depuis `develop`) = une PR vers `develop`.
 - Commits au format Conventional Commits, en français.
 - La CI (lint, types, tests, build) doit être verte avant le merge.
+- **Sous Windows**, `npm install <paquet>` peut retirer du lockfile des dépendances optionnelles propres à Linux (`@emnapi/*`), et `npm ci` échoue alors en CI. Après l'ajout d'une dépendance, régénérer le lockfile : supprimer `node_modules` et `package-lock.json`, puis relancer `npm install`.
