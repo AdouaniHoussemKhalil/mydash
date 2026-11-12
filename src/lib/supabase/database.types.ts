@@ -85,14 +85,14 @@ isOneToOne: false
                   ]
                 },"items": {
                   Row: {
-                    "archived": boolean,"body": string,"created_at": string,"created_by": string | null,"embedding": string | null,"id": string,"in_inbox": boolean,"parent_id": string | null,"pinned": boolean,"search_vector": unknown,"title": string,"type": Database["public"]['Enums']["item_type"],"updated_at": string,"workspace_id": string
+                    "archived": boolean,"body": string,"created_at": string,"created_by": string | null,"embedding": string | null,"id": string,"in_inbox": boolean,"parent_id": string | null,"pinned": boolean,"search_vector": unknown,"title": string,"type": Database["public"]['Enums']["item_type"],"updated_at": string,"url": string | null,"workspace_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived"?: boolean,"body"?: string,"created_at"?: string,"created_by"?: string | null,"embedding"?: string | null,"id"?: string,"in_inbox"?: boolean,"parent_id"?: string | null,"pinned"?: boolean,"search_vector"?: never,"title": string,"type": Database["public"]['Enums']["item_type"],"updated_at"?: string,"workspace_id": string
+                    "archived"?: boolean,"body"?: string,"created_at"?: string,"created_by"?: string | null,"embedding"?: string | null,"id"?: string,"in_inbox"?: boolean,"parent_id"?: string | null,"pinned"?: boolean,"search_vector"?: never,"title": string,"type": Database["public"]['Enums']["item_type"],"updated_at"?: string,"url"?: string | null,"workspace_id": string
                   }
                   Update: {
-                    "archived"?: boolean,"body"?: string,"created_at"?: string,"created_by"?: string | null,"embedding"?: string | null,"id"?: string,"in_inbox"?: boolean,"parent_id"?: string | null,"pinned"?: boolean,"search_vector"?: never,"title"?: string,"type"?: Database["public"]['Enums']["item_type"],"updated_at"?: string,"workspace_id"?: string
+                    "archived"?: boolean,"body"?: string,"created_at"?: string,"created_by"?: string | null,"embedding"?: string | null,"id"?: string,"in_inbox"?: boolean,"parent_id"?: string | null,"pinned"?: boolean,"search_vector"?: never,"title"?: string,"type"?: Database["public"]['Enums']["item_type"],"updated_at"?: string,"url"?: string | null,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -103,6 +103,32 @@ isOneToOne: false
       referencedColumns: ["id","workspace_id"]
     },{
       foreignKeyName: "items_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"link_meta": {
+                  Row: {
+                    "created_at": string,"is_read": boolean,"item_id": string,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"is_read"?: boolean,"item_id": string,"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"is_read"?: boolean,"item_id"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "link_meta_item_id_workspace_id_fkey"
+      columns: ["item_id","workspace_id"]
+isOneToOne: true
+      referencedRelation: "items"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "link_meta_workspace_id_fkey"
       columns: ["workspace_id"]
 isOneToOne: false
       referencedRelation: "workspaces"
