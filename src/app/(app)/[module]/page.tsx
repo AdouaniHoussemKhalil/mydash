@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
+import { listTags, TagFilter } from "@/features/tags";
 import {
   CollectionView,
   getModule,
@@ -12,6 +13,7 @@ import {
   MODULES,
   type ModuleDef,
   type ViewMode,
+  withSearchParams,
 } from "@/features/shell";
 
 // Modules connus prérendus ; tout autre segment → notFound() plus bas.
@@ -40,6 +42,7 @@ export default async function ModulePage({ params, searchParams }: PageProps<"/[
       renderDetail={(id) => <ItemDetail id={id} />}
       renderContent={(view, selectedId, query) => {
         const archived = query.archived === "1";
+        const tagId = typeof query.tag === "string" ? query.tag : undefined;
         return (
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -60,6 +63,7 @@ export default async function ModulePage({ params, searchParams }: PageProps<"/[
               view={view}
               selectedId={selectedId}
               archived={archived}
+              tagId={tagId}
               empty={
                 archived ? (
                   <EmptyState icon={<Archive />} title="Aucun élément archivé" />
@@ -84,22 +88,38 @@ async function ModuleItems({
   view,
   selectedId,
   archived,
+  tagId,
   empty,
 }: {
   definition: ModuleDef;
   view: ViewMode;
   selectedId: string | undefined;
   archived: boolean;
+  tagId: string | undefined;
   empty: ReactNode;
 }) {
-  const items = await listItems({ type: definition.type, archived });
+  const [items, tags] = await Promise.all([
+    listItems({ type: definition.type, archived, tagId }),
+    listTags(),
+  ]);
+  const keep: Record<string, string> = {};
+  if (archived) keep.archived = "1";
+  if (tagId) keep.tag = tagId;
+  if (view !== "list") keep.view = view;
   return (
-    <ItemsView
-      items={items}
-      view={view}
-      selectedId={selectedId}
-      empty={empty}
-      linkParams={archived ? { archived: "1" } : undefined}
-    />
+    <>
+      <TagFilter
+        tags={tags}
+        activeTagId={tagId}
+        hrefFor={(next) => `/${definition.slug}${withSearchParams(new URLSearchParams(keep), { tag: next })}`}
+      />
+      <ItemsView
+        items={items}
+        view={view}
+        selectedId={selectedId}
+        empty={tagId ? <EmptyState title="Aucun élément avec ce tag" /> : empty}
+        linkParams={Object.keys(keep).length ? keep : undefined}
+      />
+    </>
   );
 }

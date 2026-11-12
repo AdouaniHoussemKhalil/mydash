@@ -1,24 +1,8 @@
-import { cache } from "react";
-import { getCurrentUser } from "@/features/auth";
+import { getActiveWorkspaceId } from "@/features/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { type Item, ITEM_COLUMNS, itemIdSchema } from "./schemas";
 
-/**
- * Workspace actif. MVP : le workspace personnel. Quand le partage
- * arrivera, ce choix viendra d'un sélecteur (cookie), sans toucher aux appelants.
- */
-export const getActiveWorkspaceId = cache(async (): Promise<string> => {
-  const user = await getCurrentUser();
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("workspaces")
-    .select("id")
-    .eq("is_personal", true)
-    .eq("created_by", user.id)
-    .single();
-  if (error || !data) throw new Error("Workspace personnel introuvable");
-  return data.id;
-});
+export { getActiveWorkspaceId };
 
 export type ListItemsOptions = {
   type?: Item["type"] | undefined;
@@ -26,6 +10,10 @@ export type ListItemsOptions = {
   pinned?: boolean | undefined;
   archived?: boolean | undefined;
   limit?: number | undefined;
+  /** Items portant ce tag. */
+  tagId?: string | undefined;
+  /** Items rangés dans cet Espace. */
+  spaceId?: string | undefined;
 };
 
 export async function listItems({
@@ -34,13 +22,21 @@ export async function listItems({
   pinned,
   archived = false,
   limit = 100,
+  tagId,
+  spaceId,
 }: ListItemsOptions = {}): Promise<Item[]> {
+  if (tagId && !itemIdSchema.safeParse(tagId).success) return [];
+  if (spaceId && !itemIdSchema.safeParse(spaceId).success) return [];
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
 
+  // Jointures internes : ne garder que les items liés au tag / à l'Espace.
+  const joins = [tagId && "item_tags!inner(tag_id)", spaceId && "item_spaces!inner(space_id)"]
+    .filter(Boolean)
+    .join(", ");
   let query = supabase
     .from("items")
-    .select(ITEM_COLUMNS)
+    .select(joins ? `${ITEM_COLUMNS}, ${joins}` : ITEM_COLUMNS)
     .eq("workspace_id", workspaceId)
     .eq("archived", archived)
     .order("updated_at", { ascending: false })
@@ -48,10 +44,19 @@ export async function listItems({
   if (type) query = query.eq("type", type);
   if (inbox !== undefined) query = query.eq("in_inbox", inbox);
   if (pinned !== undefined) query = query.eq("pinned", pinned);
+  if (tagId) query = query.eq("item_tags.tag_id", tagId);
+  if (spaceId) query = query.eq("item_spaces.space_id", spaceId);
 
   const { data, error } = await query;
   if (error) throw new Error("Impossible de charger les éléments");
-  return data;
+  // Ne renvoyer que les colonnes d'Item (sans celles des jointures).
+  return (data as unknown as Item[]).map(pickItem);
+}
+
+const ITEM_KEYS = ITEM_COLUMNS.split(", ") as (keyof Item)[];
+
+function pickItem(row: Item): Item {
+  return Object.fromEntries(ITEM_KEYS.map((key) => [key, row[key]])) as Item;
 }
 
 /** Un item du workspace actif, ou null (id invalide, absent ou inaccessible). */
