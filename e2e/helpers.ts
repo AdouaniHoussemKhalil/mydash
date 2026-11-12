@@ -15,11 +15,17 @@ export async function signUp(page: Page, next = "/today") {
   return email;
 }
 
-/** Ouvre la palette au clavier et attend le champ. */
+/**
+ * Ouvre la palette au clavier. Juste après un chargement, le raccourci peut
+ * arriver avant l'hydratation (écouteur pas encore posé) : on réessaie,
+ * sans re-presser si elle est déjà ouverte (le raccourci bascule).
+ */
 export async function openPalette(page: Page) {
-  await page.keyboard.press("ControlOrMeta+k");
   const input = page.getByRole("combobox", { name: "Capturer ou rechercher" });
-  await expect(input).toBeVisible();
+  await expect(async () => {
+    if (!(await input.isVisible())) await page.keyboard.press("ControlOrMeta+k");
+    await expect(input).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
   return input;
 }
 
