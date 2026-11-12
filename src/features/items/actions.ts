@@ -2,7 +2,8 @@
 
 import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspaceId } from "./queries";
+import { z } from "zod";
+import { getActiveWorkspaceId, searchItems } from "./queries";
 import {
   type ActionResult,
   createItemSchema,
@@ -78,4 +79,17 @@ export async function deleteItem(id: unknown): Promise<ActionResult> {
 
   refresh();
   return { ok: true, data: undefined };
+}
+
+const searchQuerySchema = z.string().trim().min(1).max(200);
+
+/** Recherche rapide pour la palette (lecture seule). */
+export async function quickSearch(query: unknown): Promise<ActionResult<Item[]>> {
+  const parsed = searchQuerySchema.safeParse(query);
+  if (!parsed.success) return { ok: true, data: [] };
+  try {
+    return { ok: true, data: await searchItems(parsed.data) };
+  } catch {
+    return { ok: false, error: "Recherche impossible" };
+  }
 }
