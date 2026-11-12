@@ -30,6 +30,12 @@ export function DetailPanel({ title, children }: DetailPanelProps) {
       // Une modale ou un menu ouvert gère Échap lui-même.
       if (event.key !== "Escape" || event.defaultPrevented) return;
       if (document.querySelector("[role=dialog][data-state=open], [role=menu]")) return;
+      // En cours d'édition : Échap quitte d'abord le champ (qui s'enregistre au blur).
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.matches("input, textarea, [contenteditable=true]")) {
+        active.blur();
+        return;
+      }
       close();
     };
     window.addEventListener("keydown", onKeyDown);
