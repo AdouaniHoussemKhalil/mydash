@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import type { MouseEvent, ReactNode } from "react";
+import { type MouseEvent, type ReactNode, Suspense } from "react";
 import {
   SidebarContent,
   SidebarGroup,
@@ -9,6 +9,7 @@ import {
   SidebarNavItem,
   useSidebar,
 } from "@/components/ui/shell";
+import { Tags } from "lucide-react";
 import { MODULE_ICONS, NAV_ICONS } from "../icons";
 import { MODULES, PRIMARY_NAV } from "../modules";
 
@@ -20,14 +21,31 @@ type NavLinkProps = {
 };
 
 /**
+ * Le chemin courant est une donnée d'URL : avec Cache Components, il doit
+ * être lu derrière <Suspense>. Le repli est le même lien, sans état actif,
+ * ce qui garde la sidebar dans le shell statique.
+ */
+export function NavLink(props: NavLinkProps) {
+  return (
+    <Suspense fallback={<NavLinkItem {...props} active={false} />}>
+      <ActiveNavLink {...props} />
+    </Suspense>
+  );
+}
+
+function ActiveNavLink(props: NavLinkProps) {
+  const pathname = usePathname();
+  const active = pathname === props.href || pathname.startsWith(`${props.href}/`);
+  return <NavLinkItem {...props} active={active} />;
+}
+
+/**
  * SidebarNavItem rend un <a> sans asChild : on garde un vrai lien (clic
  * molette, Ctrl+clic) et on route côté client pour un clic simple.
  */
-function NavLink({ href, label, icon, onNavigate }: NavLinkProps) {
+function NavLinkItem({ href, label, icon, onNavigate, active }: NavLinkProps & { active: boolean }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { collapsed } = useSidebar();
-  const active = pathname === href || pathname.startsWith(`${href}/`);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
@@ -52,11 +70,13 @@ function NavLink({ href, label, icon, onNavigate }: NavLinkProps) {
 }
 
 export type SidebarNavProps = {
+  /** Liste des Espaces (rendue côté serveur). */
+  spaces?: ReactNode;
   /** Appelé après une navigation (ferme le tiroir mobile). */
   onNavigate?: (() => void) | undefined;
 };
 
-export function SidebarNav({ onNavigate }: SidebarNavProps) {
+export function SidebarNav({ onNavigate, spaces }: SidebarNavProps) {
   return (
     <SidebarContent aria-label="Navigation principale" className="gap-4">
       <SidebarGroup>
@@ -78,14 +98,13 @@ export function SidebarNav({ onNavigate }: SidebarNavProps) {
 
       <SidebarGroup>
         <SidebarGroupLabel>Espaces</SidebarGroupLabel>
-        <SpacesPlaceholder />
+        {spaces}
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <NavLink href="/tags" label="Tags" icon={<Tags />} onNavigate={onNavigate} />
       </SidebarGroup>
     </SidebarContent>
   );
 }
 
-function SpacesPlaceholder() {
-  const { collapsed } = useSidebar();
-  if (collapsed) return null;
-  return <p className="px-3 py-1 text-xs text-neutral-11">Aucun espace pour l&apos;instant.</p>;
-}

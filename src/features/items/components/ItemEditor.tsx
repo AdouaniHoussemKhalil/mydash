@@ -1,7 +1,7 @@
 "use client";
 
 import { Archive, ArchiveRestore, Inbox, Pin, PinOff } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/core";
 import { Textarea } from "@/components/ui/forms";
 import { toast } from "@/components/ui/overlays";
@@ -30,13 +30,25 @@ const SAVE_LABELS: Record<SaveState, string> = {
  * (pause de frappe ou perte de focus), actions rapides à côté.
  * Monté avec key={item.id} : l'état local repart à chaque élément.
  */
-export function ItemEditor({ item }: { item: Item }) {
+export function ItemEditor({ item, relations }: { item: Item; relations?: ReactNode }) {
   const [draft, setDraft] = useState<Draft>({ title: item.title, body: item.body });
   const [flags, setFlags] = useState({
     pinned: item.pinned,
     archived: item.archived,
     in_inbox: item.in_inbox,
   });
+  // Un changement venu du serveur (ex. ranger dans un Espace sort de
+  // l'Inbox) met à jour les indicateurs : resynchronisation pendant le rendu.
+  const [serverFlags, setServerFlags] = useState(flags);
+  if (
+    item.pinned !== serverFlags.pinned ||
+    item.archived !== serverFlags.archived ||
+    item.in_inbox !== serverFlags.in_inbox
+  ) {
+    const next = { pinned: item.pinned, archived: item.archived, in_inbox: item.in_inbox };
+    setServerFlags(next);
+    setFlags(next);
+  }
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [updatedAt, setUpdatedAt] = useState(item.updated_at);
   const [, startTransition] = useTransition();
@@ -204,6 +216,8 @@ export function ItemEditor({ item }: { item: Item }) {
           {flags.archived ? "Désarchiver" : "Archiver"}
         </Button>
       </div>
+
+      {relations}
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 border-t border-neutral-6 pt-4 text-xs text-neutral-11">
         <dt>Créé</dt>

@@ -19,6 +19,8 @@ import { ThemeMenu } from "./ThemeMenu";
 export type AppShellProps = {
   /** Bas de sidebar (compte), rendu côté serveur. */
   account: ReactNode;
+  /** Navigation des Espaces, rendue côté serveur. */
+  spaces: ReactNode;
   children: ReactNode;
 };
 
@@ -31,7 +33,7 @@ function Brand() {
  * barre supérieure, zone centrale. Le panneau détail est rendu par chaque
  * page (il dépend de ?item=).
  */
-export function AppShell({ account, children }: AppShellProps) {
+export function AppShell({ account, spaces, children }: AppShellProps) {
   const [collapsed, setCollapsed] = usePersistentState("mydash-sidebar-collapsed", false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -42,7 +44,7 @@ export function AppShell({ account, children }: AppShellProps) {
           <SidebarHeader>
             <Brand />
           </SidebarHeader>
-          <SidebarNav />
+          <SidebarNav spaces={spaces} />
           <SidebarFooter className="border-t border-neutral-6 p-2">{account}</SidebarFooter>
         </Sidebar>
 
@@ -55,7 +57,7 @@ export function AppShell({ account, children }: AppShellProps) {
                 <SidebarHeader>
                   <Brand />
                 </SidebarHeader>
-                <SidebarNav onNavigate={() => setMobileOpen(false)} />
+                <SidebarNav spaces={spaces} onNavigate={() => setMobileOpen(false)} />
                 <SidebarFooter className="border-t border-neutral-6 p-2">{account}</SidebarFooter>
               </div>
             </SidebarProvider>
