@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createItemSchema, itemIdSchema } from "./schemas";
+import { createItemSchema, itemIdSchema, updateItemSchema } from "./schemas";
 
 describe("createItemSchema", () => {
   it("n'exige que le type et le titre", () => {
@@ -20,6 +20,25 @@ describe("createItemSchema", () => {
 
   it("refuse un titre trop long", () => {
     expect(createItemSchema.safeParse({ type: "note", title: "x".repeat(501) }).success).toBe(false);
+  });
+});
+
+describe("updateItemSchema", () => {
+  it("accepte un patch partiel", () => {
+    expect(updateItemSchema.parse({ pinned: true })).toEqual({ pinned: true });
+  });
+
+  it("refuse un patch vide", () => {
+    expect(updateItemSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("refuse les champs non modifiables", () => {
+    expect(updateItemSchema.safeParse({ workspace_id: "x" }).success).toBe(false);
+    expect(updateItemSchema.safeParse({ title: "ok", created_by: "x" }).success).toBe(false);
+  });
+
+  it("refuse de vider le titre", () => {
+    expect(updateItemSchema.safeParse({ title: " " }).success).toBe(false);
   });
 });
 

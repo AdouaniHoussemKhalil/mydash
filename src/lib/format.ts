@@ -28,7 +28,10 @@ export function formatDateTime(date: string | Date): string {
 export function excerpt(markdown: string, max = 160): string {
   const text = markdown
     .replace(/```[\s\S]*?```/g, " ")
-    .replace(/[#>*_`~\[\]()!-]/g, " ")
+    // Emphase et code en ligne : retirés sans espace (« **gras**. » → « gras. »)
+    .replace(/[*_`~]/g, "")
+    .replace(/^\s*[-+]\s+/gm, " ")
+    .replace(/[#>\[\]()!]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;

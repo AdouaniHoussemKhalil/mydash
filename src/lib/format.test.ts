@@ -21,6 +21,10 @@ describe("excerpt", () => {
     );
   });
 
+  it("ne laisse pas d'espace avant la ponctuation ni ne casse les tirets", () => {
+    expect(excerpt("Du contenu **Markdown**. Mot-clé")).toBe("Du contenu Markdown. Mot-clé");
+  });
+
   it("tronque proprement", () => {
     expect(excerpt("a".repeat(300), 10)).toBe(`${"a".repeat(9)}…`);
   });

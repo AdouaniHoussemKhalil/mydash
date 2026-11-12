@@ -24,6 +24,20 @@ export const createItemSchema = z.object({
 });
 export type CreateItemInput = z.input<typeof createItemSchema>;
 
+/** Mise à jour partielle : au moins un champ. */
+export const updateItemSchema = z
+  .object({
+    title: titleSchema,
+    body: bodySchema,
+    pinned: z.boolean(),
+    archived: z.boolean(),
+    in_inbox: z.boolean(),
+  })
+  .partial()
+  .strict()
+  .refine((patch) => Object.keys(patch).length > 0, "Rien à mettre à jour");
+export type UpdateItemInput = z.input<typeof updateItemSchema>;
+
 /** Colonnes lues côté client (sans search_vector ni embedding). */
 export const ITEM_COLUMNS =
   "id, workspace_id, type, title, body, pinned, archived, in_inbox, parent_id, created_at, updated_at" as const;
