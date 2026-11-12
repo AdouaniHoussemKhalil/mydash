@@ -1,6 +1,7 @@
 import { getActiveWorkspaceId } from "@/features/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { type Item, ITEM_COLUMNS, itemIdSchema } from "./schemas";
+import { toPrefixQuery } from "./search";
 
 export { getActiveWorkspaceId };
 
@@ -71,5 +72,23 @@ export async function getItem(id: string): Promise<Item | null> {
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error("Impossible de charger l'élément");
+  return data;
+}
+
+/** Recherche rapide (palette) : préfixes sur le titre et le contenu, titres d'abord. */
+export async function searchItems(query: string, limit = 8): Promise<Item[]> {
+  const tsquery = toPrefixQuery(query);
+  if (!tsquery) return [];
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("items")
+    .select(ITEM_COLUMNS)
+    .eq("workspace_id", workspaceId)
+    .eq("archived", false)
+    .textSearch("search_vector", tsquery, { config: "simple" })
+    .order("updated_at", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error("Recherche impossible");
   return data;
 }
