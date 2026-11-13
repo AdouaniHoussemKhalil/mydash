@@ -1,8 +1,14 @@
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
+import { ItemAttachments } from "@/features/files";
 import { getItemSpaces, ItemSpacesEditor, listSpaces } from "@/features/spaces";
 import { getItemTags, ItemTagsEditor, listTags } from "@/features/tags";
 import { getItem } from "../queries";
 import { ItemEditor } from "./ItemEditor";
+
+/** Types dont le détail propose des pièces jointes. */
+const ATTACHMENT_TYPES = new Set(["file", "doc", "prompt", "skill"]);
 
 /** Contenu du panneau détail : chargement serveur, édition en place côté client. */
 export async function ItemDetail({ id }: { id: string }) {
@@ -29,6 +35,11 @@ export async function ItemDetail({ id }: { id: string }) {
       item={item}
       relations={
         <div className="flex flex-col gap-4">
+          {ATTACHMENT_TYPES.has(item.type) && (
+            <Suspense fallback={<Skeleton className="h-28 w-full" />}>
+              <ItemAttachments itemId={item.id} />
+            </Suspense>
+          )}
           <ItemTagsEditor key={`tags-${item.id}`} itemId={item.id} tags={tags} allTags={allTags} />
           <ItemSpacesEditor key={`spaces-${item.id}`} itemId={item.id} spaces={spaces} allSpaces={allSpaces} />
         </div>

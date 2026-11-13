@@ -40,3 +40,24 @@ export async function removeStoredObjects(paths: string[]): Promise<void> {
   const supabase = await createClient();
   await supabase.storage.from(FILES_BUCKET).remove(paths);
 }
+
+/**
+ * URL signée courte (60 s) vers un fichier du workspace actif : affichage
+ * dans le navigateur, ou téléchargement sous son nom d'origine.
+ */
+export async function signedFileUrl(fileId: string, download: boolean): Promise<string | null> {
+  if (!UUID.test(fileId)) return null;
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data: file } = await supabase
+    .from("item_files")
+    .select("storage_path, name")
+    .eq("workspace_id", workspaceId)
+    .eq("id", fileId)
+    .maybeSingle();
+  if (!file) return null;
+  const { data } = await supabase.storage
+    .from(FILES_BUCKET)
+    .createSignedUrl(file.storage_path, 60, download ? { download: file.name } : undefined);
+  return data?.signedUrl ?? null;
+}
