@@ -5,6 +5,8 @@ import { removeStoredObjects, storagePathsOf } from "@/features/files";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { writeLinkMeta } from "./link-meta";
+import { writeTaskDetails } from "./task-details";
+import { taskPatchSchema } from "./tasks";
 import { getActiveWorkspaceId, LINK_RELATION, searchItems } from "./queries";
 import { parseUrl, urlTitle } from "@/lib/url";
 import {
@@ -27,15 +29,52 @@ export async function createItem(
   // getActiveWorkspaceId vérifie la session (redirige vers /login sinon).
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
+  const { task, ...fields } = parsed.data;
   const { data, error } = await supabase
     .from("items")
-    .insert({ ...parsed.data, workspace_id: workspaceId })
+    .insert({ ...fields, workspace_id: workspaceId })
     .select("id, type")
     .single();
   if (error || !data) return { ok: false, error: "Création impossible. Réessaie." };
 
+  // Une tâche a toujours sa ligne task_details (filtre par état, calendrier).
+  if (data.type === "task") {
+    const written = await writeTaskDetails(supabase, workspaceId, data.id, {
+      status: task?.status ?? "todo",
+      due_date: task?.due_date ?? null,
+    });
+    if (!written) {
+      await supabase.from("items").delete().eq("workspace_id", workspaceId).eq("id", data.id);
+      return { ok: false, error: "Création impossible. Réessaie." };
+    }
+  }
+
   refresh();
   return { ok: true, data };
+}
+
+/** État et échéance d'une tâche. */
+export async function setTaskDetails(id: unknown, patch: unknown): Promise<ActionResult> {
+  const parsedId = itemIdSchema.safeParse(id);
+  const parsed = taskPatchSchema.safeParse(patch);
+  if (!parsedId.success) return { ok: false, error: "Tâche introuvable" };
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Données invalides" };
+
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data: item } = await supabase
+    .from("items")
+    .select("type")
+    .eq("workspace_id", workspaceId)
+    .eq("id", parsedId.data)
+    .maybeSingle();
+  if (item?.type !== "task") return { ok: false, error: "Tâche introuvable" };
+
+  const written = await writeTaskDetails(supabase, workspaceId, parsedId.data, parsed.data);
+  if (!written) return { ok: false, error: "Enregistrement impossible. Réessaie." };
+
+  refresh();
+  return { ok: true, data: undefined };
 }
 
 /** Mise à jour partielle (édition en place, épingler, archiver, Inbox). */

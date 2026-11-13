@@ -22,6 +22,8 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
   const pathname = usePathname();
   const inputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
+  // Tâches : échéance facultative dès la création.
+  const [due, setDue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -33,13 +35,18 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
       // Module Liens : une URL collée devient l'URL du lien, avec un titre lisible.
       const url = type === "link" ? parseUrl(title) : null;
       const result = await createItem(
-        url ? { type, title: urlTitle(url), url: url.toString() } : { type, title },
+        url
+          ? { type, title: urlTitle(url), url: url.toString() }
+          : type === "task"
+            ? { type, title, task: { due_date: due || null } }
+            : { type, title },
       );
       if (!result.ok) {
         setError(result.error);
         return;
       }
       setTitle("");
+      setDue("");
       router.replace(`${pathname}${withSearchParams(window.location.search, { item: result.data.id })}`, {
         scroll: false,
       });
@@ -69,6 +76,18 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
           Ajouter
         </Button>
       </div>
+      {type === "task" && (
+        <label className="flex items-center gap-2 text-xs text-neutral-11">
+          Échéance (facultatif)
+          <Input
+            type="date"
+            value={due}
+            onChange={(event) => setDue(event.target.value)}
+            className="h-8 w-40 text-xs"
+            disabled={isPending}
+          />
+        </label>
+      )}
       {error && (
         <p role="alert" className="text-sm text-danger-11">
           {error}

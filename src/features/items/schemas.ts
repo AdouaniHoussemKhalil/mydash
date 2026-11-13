@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Constants, type Tables } from "@/lib/supabase/database.types";
 import { parseUrl, URL_MAX } from "@/lib/url";
+import { dueDateSchema, taskStatusSchema } from "./tasks";
 
 export const itemTypeSchema = z.enum(Constants.public.Enums.item_type);
 
@@ -42,6 +43,8 @@ export const createItemSchema = z.object({
   title: titleSchema,
   body: bodySchema.default(""),
   url: urlSchema.optional(),
+  /** Tâches : état et échéance initiaux. */
+  task: z.object({ status: taskStatusSchema.optional(), due_date: dueDateSchema.optional() }).strict().optional(),
 });
 export type CreateItemInput = z.input<typeof createItemSchema>;
 
@@ -72,7 +75,7 @@ export const LINK_META_FIELDS =
 export const ITEM_FILE_FIELDS = "name, mime_type, size_bytes" as const;
 
 export const ITEM_COLUMNS =
-  `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS}), item_files(${ITEM_FILE_FIELDS})` as const;
+  `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS}), item_files(${ITEM_FILE_FIELDS}), task_details(status, due_date)` as const;
 
 export type LinkMeta = Pick<
   Tables<"link_meta">,
@@ -96,6 +99,7 @@ export type Item = Pick<
 > & {
   link_meta: LinkMeta | null;
   item_files: Pick<Tables<"item_files">, "name" | "mime_type" | "size_bytes">[];
+  task_details: Pick<Tables<"task_details">, "status" | "due_date"> | null;
 };
 
 /** Un lien est « lu » seulement si on l'a marqué comme tel. */

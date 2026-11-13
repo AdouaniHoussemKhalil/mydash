@@ -75,6 +75,7 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
   - Les règles d'accès Storage reprennent celles du workspace : lecture pour les membres, dépôt et suppression pour `owner` et `editor`, et seulement pour un élément existant.
   - Le navigateur envoie le fichier directement à Storage, par une URL signée. La lecture passe par des URL signées valables 10 minutes.
   - Storage n'accepte la suppression que par son API : supprimer un élément supprime donc aussi ses fichiers stockés, depuis l'action serveur.
+- **Tâches** : l'état (`todo`, `doing` ou `done`) et l'échéance (type `date`) sont dans `task_details`, en relation 1-1 avec l'élément. Une ligne est créée pour chaque tâche. Le retard se calcule dans le navigateur, d'après la date locale de l'utilisateur.
 
 ## Scripts
 

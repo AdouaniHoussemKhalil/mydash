@@ -6,7 +6,17 @@ import { type ReactNode, Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
 import { FileDropCreate } from "@/features/files";
-import { createItem, ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
+import {
+  createItem,
+  ItemDetail,
+  ItemsView,
+  listItems,
+  QuickCreate,
+  TASK_STATUS_LABELS,
+  type TaskStatus,
+  TaskStatusFilter,
+  taskStatusSchema,
+} from "@/features/items";
 import { listTags, TagFilter } from "@/features/tags";
 import {
   CollectionView,
@@ -67,6 +77,8 @@ async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
       renderContent={(view, selectedId, query) => {
         const archived = query.archived === "1";
         const tagId = typeof query.tag === "string" ? query.tag : undefined;
+        const taskStatus =
+          definition.type === "task" ? taskStatusSchema.safeParse(query.status).data : undefined;
         return (
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -93,6 +105,7 @@ async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
               selectedId={selectedId}
               archived={archived}
               tagId={tagId}
+              taskStatus={taskStatus}
               empty={
                 archived ? (
                   <EmptyState icon={<Archive />} title="Aucun élément archivé" />
@@ -122,6 +135,7 @@ async function ModuleItems({
   selectedId,
   archived,
   tagId,
+  taskStatus,
   empty,
 }: {
   definition: ModuleDef;
@@ -129,18 +143,26 @@ async function ModuleItems({
   selectedId: string | undefined;
   archived: boolean;
   tagId: string | undefined;
+  taskStatus: TaskStatus | undefined;
   empty: ReactNode;
 }) {
   const [items, tags] = await Promise.all([
-    listItems({ type: definition.type, archived, tagId }),
+    listItems({ type: definition.type, archived, tagId, taskStatus }),
     listTags(),
   ]);
   const keep: Record<string, string> = {};
   if (archived) keep.archived = "1";
   if (tagId) keep.tag = tagId;
+  if (taskStatus) keep.status = taskStatus;
   if (view !== "list") keep.view = view;
   return (
     <>
+      {definition.type === "task" && (
+        <TaskStatusFilter
+          active={taskStatus}
+          hrefFor={(next) => `/${definition.slug}${withSearchParams(new URLSearchParams(keep), { status: next })}`}
+        />
+      )}
       <TagFilter
         tags={tags}
         activeTagId={tagId}
@@ -150,7 +172,15 @@ async function ModuleItems({
         items={items}
         view={view}
         selectedId={selectedId}
-        empty={tagId ? <EmptyState title="Aucun élément avec ce tag" /> : empty}
+        empty={
+          tagId ? (
+            <EmptyState title="Aucun élément avec ce tag" />
+          ) : taskStatus ? (
+            <EmptyState title={`Aucune tâche « ${TASK_STATUS_LABELS[taskStatus].toLowerCase()} »`} />
+          ) : (
+            empty
+          )
+        }
         linkParams={Object.keys(keep).length ? keep : undefined}
       />
     </>
