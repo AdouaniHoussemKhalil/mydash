@@ -1,6 +1,7 @@
 import { getActiveWorkspaceId } from "@/features/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { type Item, ITEM_COLUMNS, ITEM_FIELDS, itemIdSchema } from "./schemas";
+import type { TaskStatus } from "./tasks";
 import { toPrefixQuery } from "./search";
 
 export { getActiveWorkspaceId };
@@ -15,6 +16,8 @@ export type ListItemsOptions = {
   tagId?: string | undefined;
   /** Items rangés dans cet Espace. */
   spaceId?: string | undefined;
+  /** Tâches dans cet état. */
+  taskStatus?: TaskStatus | undefined;
 };
 
 export async function listItems({
@@ -25,6 +28,7 @@ export async function listItems({
   limit = 100,
   tagId,
   spaceId,
+  taskStatus,
 }: ListItemsOptions = {}): Promise<Item[]> {
   if (tagId && !itemIdSchema.safeParse(tagId).success) return [];
   if (spaceId && !itemIdSchema.safeParse(spaceId).success) return [];
@@ -32,7 +36,12 @@ export async function listItems({
   const supabase = await createClient();
 
   // Jointures internes : ne garder que les items liés au tag / à l'Espace.
-  const joins = [tagId && "item_tags!inner(tag_id)", spaceId && "item_spaces!inner(space_id)"]
+  // task_details est déjà lu : la jointure de filtre prend un alias.
+  const joins = [
+    tagId && "item_tags!inner(tag_id)",
+    spaceId && "item_spaces!inner(space_id)",
+    taskStatus && "task_filter:task_details!inner(status)",
+  ]
     .filter(Boolean)
     .join(", ");
   let query = supabase
@@ -47,6 +56,7 @@ export async function listItems({
   if (pinned !== undefined) query = query.eq("pinned", pinned);
   if (tagId) query = query.eq("item_tags.tag_id", tagId);
   if (spaceId) query = query.eq("item_spaces.space_id", spaceId);
+  if (taskStatus) query = query.eq("task_filter.status", taskStatus);
 
   const { data, error } = await query;
   if (error) throw new Error("Impossible de charger les éléments");
@@ -54,8 +64,8 @@ export async function listItems({
   return (data as unknown as Item[]).map(pickItem);
 }
 
-// Clés d'Item : colonnes simples + les relations link_meta et item_files.
-const ITEM_KEYS = [...ITEM_FIELDS.split(", "), "link_meta", "item_files"] as (keyof Item)[];
+// Clés d'Item : colonnes simples + les relations (link_meta, item_files, task_details).
+const ITEM_KEYS = [...ITEM_FIELDS.split(", "), "link_meta", "item_files", "task_details"] as (keyof Item)[];
 
 function pickItem(row: Item): Item {
   return Object.fromEntries(ITEM_KEYS.map((key) => [key, row[key]])) as Item;

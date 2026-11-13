@@ -18,6 +18,7 @@ import { RemoteImage } from "@/components/RemoteImage";
 import { fileKindLabel, formatBytes } from "@/features/files";
 import { type Item, isRead } from "../schemas";
 import { ItemTypeBadge } from "./ItemTypeBadge";
+import { TaskMeta } from "./TaskMeta";
 
 export type ItemsViewProps = {
   items: Item[];
@@ -90,6 +91,11 @@ function Attachments({ item }: { item: Item }) {
   );
 }
 
+function Task({ item }: { item: Item }) {
+  if (item.type !== "task") return null;
+  return <TaskMeta status={item.task_details?.status ?? "todo"} dueDate={item.task_details?.due_date ?? null} />;
+}
+
 function ToRead({ item }: { item: Item }) {
   if (item.type !== "link" || isRead(item)) return null;
   return (
@@ -124,6 +130,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                     <span className="flex items-center gap-2">
                       <Attachments item={item} />
                       <ToRead item={item} />
+                      <Task item={item} />
                       <PinMark pinned={item.pinned} />
                     </span>
                   </div>
@@ -173,6 +180,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                     </Link>
                     <Attachments item={item} />
                     <ToRead item={item} />
+                    <Task item={item} />
                     <OpenSite item={item} />
                   </div>
                 </TableCell>
@@ -211,6 +219,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             </div>
             <Attachments item={item} />
             <ToRead item={item} />
+            <Task item={item} />
             {showType && (
               <span className="hidden sm:inline-flex">
                 <ItemTypeBadge type={item.type} />

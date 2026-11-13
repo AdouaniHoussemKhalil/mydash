@@ -13,6 +13,7 @@ import type { Item, UpdateItemInput } from "../schemas";
 import { DeleteItemButton } from "./DeleteItemButton";
 import { ItemTypeBadge } from "./ItemTypeBadge";
 import { LinkFields } from "./LinkFields";
+import { TaskFields } from "./TaskFields";
 
 const AUTOSAVE_DELAY_MS = 600;
 
@@ -198,6 +199,7 @@ export function ItemEditor({
 
       {preview}
       {item.type === "link" && <LinkFields item={item} onPreviewTitle={applyServerTitle} />}
+      {item.type === "task" && <TaskFields item={item} />}
 
       <div className="flex flex-col gap-1">
         <label htmlFor={`body-${item.id}`} className="sr-only">
