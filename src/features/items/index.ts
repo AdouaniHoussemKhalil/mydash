@@ -4,7 +4,15 @@ export { ItemsView, type ItemsViewProps } from "./components/ItemsView";
 export { ItemTypeBadge } from "./components/ItemTypeBadge";
 export { QuickCreate } from "./components/QuickCreate";
 export { TaskStatusFilter } from "./components/TaskStatusFilter";
-export { getActiveWorkspaceId, getItem, listItems, type ListItemsOptions, searchItems } from "./queries";
+export {
+  type DatedTask,
+  getActiveWorkspaceId,
+  getItem,
+  listDatedTasks,
+  listItems,
+  type ListItemsOptions,
+  searchItems,
+} from "./queries";
 export { normalize, toPrefixQuery } from "./search";
 export {
   type ActionResult,

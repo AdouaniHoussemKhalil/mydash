@@ -20,6 +20,8 @@ export type CollectionViewProps = {
   ) => ReactNode;
   /** Contenu du panneau détail pour l'item sélectionné (?item=). */
   renderDetail?: ((itemId: string) => ReactNode) | undefined;
+  /** Sélecteur liste / cartes / tableau (masqué pour le calendrier). */
+  showViews?: boolean | undefined;
 };
 
 /**
@@ -42,6 +44,7 @@ async function CollectionContent({
   searchParams,
   renderContent,
   renderDetail,
+  showViews = true,
 }: CollectionViewProps) {
   const params = await searchParams;
   const view = parseView(params.view);
@@ -52,7 +55,7 @@ async function CollectionContent({
     <>
       <main className="min-w-0 flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 md:px-6">
-          <PageHeader title={title} description={description} icon={icon} actions={<ViewSwitcher value={view} />} />
+          <PageHeader title={title} description={description} icon={icon} actions={showViews ? <ViewSwitcher value={view} /> : undefined} />
           {renderContent(view, itemId, params)}
         </div>
       </main>

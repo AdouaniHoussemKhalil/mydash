@@ -20,3 +20,77 @@
 body {
   @apply bg-neutral-1 text-neutral-12 font-sans;
 }
+
+/* ─────────── Calendrier (FullCalendar) aux couleurs QuickadUI ─────────── */
+.mydash-calendar {
+  --fc-page-bg-color: var(--color-neutral-1);
+  --fc-neutral-bg-color: var(--color-neutral-2);
+  --fc-neutral-text-color: var(--color-neutral-11);
+  --fc-border-color: var(--color-neutral-6);
+  --fc-today-bg-color: var(--color-accent-2);
+  --fc-button-text-color: var(--color-neutral-12);
+  --fc-button-bg-color: var(--color-neutral-1);
+  --fc-button-border-color: var(--color-neutral-7);
+  --fc-button-hover-bg-color: var(--color-neutral-2);
+  --fc-button-hover-border-color: var(--color-neutral-8);
+  --fc-button-active-bg-color: var(--color-accent-4);
+  --fc-button-active-border-color: var(--color-accent-8);
+  --fc-event-bg-color: var(--color-accent-3);
+  --fc-event-border-color: var(--color-accent-7);
+  --fc-event-text-color: var(--color-accent-12);
+  /* Pas de voile sombre sur l'événement actif : contour de focus à la place. */
+  --fc-event-selected-overlay-color: transparent;
+  --fc-small-font-size: 0.75rem;
+  font-size: 0.875rem;
+}
+.mydash-calendar .fc .fc-toolbar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+/* « novembre 2026 » → « Novembre 2026 », sans toucher à « nov. » */
+.mydash-calendar .fc .fc-toolbar-title::first-letter,
+.mydash-calendar .fc .fc-button::first-letter {
+  text-transform: uppercase;
+}
+.mydash-calendar .fc .fc-button {
+  font-size: 0.8125rem;
+  box-shadow: none;
+}
+.mydash-calendar .fc .fc-button:focus-visible,
+.mydash-calendar .fc .fc-event:focus-visible {
+  outline: 2px solid var(--color-accent-8);
+  outline-offset: 2px;
+}
+.mydash-calendar .fc .fc-daygrid-day-number,
+.mydash-calendar .fc .fc-col-header-cell-cushion {
+  color: var(--color-neutral-11);
+}
+.mydash-calendar .fc-event {
+  padding: 1px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.mydash-calendar .fc-event .fc-event-main {
+  color: var(--fc-event-text-color);
+}
+/* Titres longs : retour à la ligne plutôt que coupure. */
+.mydash-calendar .fc-daygrid-event .fc-event-title {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.mydash-calendar .fc-event.task-doing {
+  background-color: var(--color-warning-3);
+  border-color: var(--color-warning-7);
+  --fc-event-text-color: var(--color-warning-12);
+}
+.mydash-calendar .fc-event.task-done {
+  background-color: var(--color-neutral-2);
+  border-color: var(--color-neutral-6);
+  --fc-event-text-color: var(--color-neutral-11);
+}
+.mydash-calendar .fc-event.task-done .fc-event-title {
+  text-decoration: line-through;
+}
+.mydash-calendar .fc-event.is-selected {
+  box-shadow: 0 0 0 2px var(--color-accent-8);
+}

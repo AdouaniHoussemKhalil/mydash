@@ -2,7 +2,7 @@
 
 Application web personnelle qui centralise et organise liens, fichiers, documentations, notes, repos Git, outils favoris, prompts, skills et calendrier.
 
-**Stack** : Next.js 16 (App Router, Cache Components) · TypeScript strict · Tailwind CSS v4 · [QuickadUI](https://quickadui-docs-nu.vercel.app/) · Supabase (PostgreSQL, Auth, Storage, RLS) · Zod · Vitest.
+**Stack** : Next.js 16 (App Router, Cache Components) · TypeScript strict · Tailwind CSS v4 · [QuickadUI](https://quickadui-docs-nu.vercel.app/) · Supabase (PostgreSQL, Auth, Storage, RLS) · FullCalendar · Zod · Vitest.
 
 ## Prérequis
 

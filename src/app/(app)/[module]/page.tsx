@@ -28,9 +28,12 @@ import {
   withSearchParams,
 } from "@/features/shell";
 
+// Modules ayant leur propre page (route statique prioritaire).
+const DEDICATED_PAGES = new Set(["calendar"]);
+
 // Modules connus prérendus ; tout autre segment → notFound() plus bas.
 export function generateStaticParams() {
-  return MODULES.map(({ slug }) => ({ module: slug }));
+  return MODULES.filter(({ slug }) => !DEDICATED_PAGES.has(slug)).map(({ slug }) => ({ module: slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/[module]">): Promise<Metadata> {
@@ -63,7 +66,7 @@ function ModuleSkeleton() {
 async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
   const { module: slug } = await params;
   const definition = MODULES.find((module) => module.slug === slug);
-  if (!definition) notFound();
+  if (!definition || DEDICATED_PAGES.has(definition.slug)) notFound();
 
   const Icon = MODULE_ICONS[definition.slug];
 
