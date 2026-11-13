@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileInfoSchema, fileNameSchema, formatBytes, previewKind } from "./schemas";
+import { fileInfoSchema, fileKindLabel, fileNameSchema, formatBytes, previewKind } from "./schemas";
 
 describe("fileNameSchema", () => {
   it("retire le chemin et les caractères de contrôle", () => {
@@ -37,5 +37,16 @@ describe("previewKind", () => {
     expect(previewKind("image/png")).toBe("image");
     expect(previewKind("application/pdf")).toBe("pdf");
     expect(previewKind("image/svg+xml")).toBeNull();
+  });
+});
+
+describe("fileKindLabel", () => {
+  it("nomme le type d'après le MIME, sinon l'extension", () => {
+    expect(fileKindLabel("a.pdf", "application/pdf")).toBe("PDF");
+    expect(fileKindLabel("a.png", "image/png")).toBe("Image PNG");
+    expect(fileKindLabel("a.svg", "image/svg+xml")).toBe("Image SVG");
+    expect(fileKindLabel("notes.md", "text/markdown")).toBe("MD");
+    expect(fileKindLabel("LISEZMOI", "text/plain")).toBe("Texte");
+    expect(fileKindLabel("x", "application/octet-stream")).toBe("Fichier");
   });
 });

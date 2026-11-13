@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
-import { ItemAttachments } from "@/features/files";
+import { FilePreview, ItemAttachments } from "@/features/files";
 import { getItemSpaces, ItemSpacesEditor, listSpaces } from "@/features/spaces";
 import { getItemTags, ItemTagsEditor, listTags } from "@/features/tags";
 import { getItem } from "../queries";
@@ -33,6 +33,13 @@ export async function ItemDetail({ id }: { id: string }) {
     <ItemEditor
       key={item.id}
       item={item}
+      preview={
+        item.type === "file" ? (
+          <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+            <FilePreview itemId={item.id} />
+          </Suspense>
+        ) : undefined
+      }
       relations={
         <div className="flex flex-col gap-4">
           {ATTACHMENT_TYPES.has(item.type) && (

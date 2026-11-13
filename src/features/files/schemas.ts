@@ -60,6 +60,18 @@ export function formatBytes(bytes: number): string {
   return `${value.toLocaleString("fr-FR", { maximumFractionDigits: digits })} ${units[unit]}`;
 }
 
+/** Libellé court du type : « PDF », « Image PNG », « Texte », sinon l'extension. */
+export function fileKindLabel(name: string, mimeType: string): string {
+  if (mimeType === "application/pdf") return "PDF";
+  const [family, subtype = ""] = mimeType.split("/");
+  if (family === "image") return `Image ${subtype.replace(/\+.*$/, "").toUpperCase()}`;
+  if (family === "video") return "Vidéo";
+  if (family === "audio") return "Audio";
+  const extension = /\.([a-z0-9]{1,8})$/i.exec(name)?.[1];
+  if (extension) return extension.toUpperCase();
+  return family === "text" ? "Texte" : "Fichier";
+}
+
 /** Aperçu possible dans le navigateur. */
 export function previewKind(mimeType: string): "image" | "pdf" | null {
   if (/^image\/(png|jpe?g|gif|webp|avif|bmp)$/.test(mimeType)) return "image";

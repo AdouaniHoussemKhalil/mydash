@@ -68,7 +68,11 @@ export const ITEM_FIELDS =
 export const LINK_META_FIELDS =
   "is_read, page_title, description, site_name, image_url, favicon_url, fetched_at, fetch_error" as const;
 
-export const ITEM_COLUMNS = `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS})` as const;
+/** Fichiers attachés (nom, type, taille) pour les listes. */
+export const ITEM_FILE_FIELDS = "name, mime_type, size_bytes" as const;
+
+export const ITEM_COLUMNS =
+  `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS}), item_files(${ITEM_FILE_FIELDS})` as const;
 
 export type LinkMeta = Pick<
   Tables<"link_meta">,
@@ -89,7 +93,10 @@ export type Item = Pick<
   | "parent_id"
   | "created_at"
   | "updated_at"
-> & { link_meta: LinkMeta | null };
+> & {
+  link_meta: LinkMeta | null;
+  item_files: Pick<Tables<"item_files">, "name" | "mime_type" | "size_bytes">[];
+};
 
 /** Un lien est « lu » seulement si on l'a marqué comme tel. */
 export function isRead(item: Pick<Item, "link_meta">) {
