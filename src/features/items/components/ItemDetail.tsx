@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
 import { FilePreview, ItemAttachments } from "@/features/files";
+import { ItemRepoActivity } from "@/features/repos";
 import { getItemSpaces, ItemSpacesEditor, listSpaces } from "@/features/spaces";
 import { getItemTags, ItemTagsEditor, listTags } from "@/features/tags";
 import { getItem } from "../queries";
@@ -45,6 +46,12 @@ export async function ItemDetail({ id }: { id: string }) {
       }
       relations={
         <div className="flex flex-col gap-4">
+          {item.type === "repo" && (
+            <Suspense fallback={<Skeleton className="h-40 w-full" />}>
+              {/* L'URL fait partie de la clé : la changer recharge l'activité. */}
+              <ItemRepoActivity key={item.url ?? "none"} itemId={item.id} url={item.url} />
+            </Suspense>
+          )}
           {ATTACHMENT_TYPES.has(item.type) && (
             <Suspense fallback={<Skeleton className="h-28 w-full" />}>
               <ItemAttachments itemId={item.id} />

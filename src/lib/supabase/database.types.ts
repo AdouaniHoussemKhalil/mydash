@@ -161,6 +161,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"repo_activity": {
+                  Row: {
+                    "ci_state": string | null,"created_at": string,"fetch_error": string | null,"fetched_at": string | null,"item_id": string,"open_pr_count": number | null,"snapshot": NonNullable<Json>,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ci_state"?: string | null,"created_at"?: string,"fetch_error"?: string | null,"fetched_at"?: string | null,"item_id": string,"open_pr_count"?: number | null,"snapshot"?: NonNullable<Json>,"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "ci_state"?: string | null,"created_at"?: string,"fetch_error"?: string | null,"fetched_at"?: string | null,"item_id"?: string,"open_pr_count"?: number | null,"snapshot"?: NonNullable<Json>,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "repo_activity_item_id_workspace_id_fkey"
+      columns: ["item_id","workspace_id"]
+isOneToOne: true
+      referencedRelation: "items"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "repo_activity_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"spaces": {
                   Row: {
                     "color": string | null,"created_at": string,"icon": string | null,"id": string,"name": string,"position": number,"updated_at": string,"workspace_id": string

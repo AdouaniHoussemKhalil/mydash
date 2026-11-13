@@ -1,4 +1,4 @@
-import { ExternalLink, Paperclip, Pin } from "lucide-react";
+import { ExternalLink, GitPullRequest, Paperclip, Pin } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Badge, Card, CardContent, CardHeader, CardTitle, IconButton } from "@/components/ui/core";
@@ -16,6 +16,7 @@ import { displayHost } from "@/lib/url";
 import { cn } from "@quickadui/utils";
 import { RemoteImage } from "@/components/RemoteImage";
 import { fileKindLabel, formatBytes } from "@/features/files";
+import { CI_LABELS, type CiState } from "@/features/repos";
 import { type Item, isRead } from "../schemas";
 import { ItemTypeBadge } from "./ItemTypeBadge";
 import { TaskMeta } from "./TaskMeta";
@@ -96,6 +97,31 @@ function Task({ item }: { item: Item }) {
   return <TaskMeta status={item.task_details?.status ?? "todo"} dueDate={item.task_details?.due_date ?? null} />;
 }
 
+const CI_BADGE = { success: "success", failure: "danger", running: "warning" } as const;
+
+/** Repos : état de la CI (si notable) et nombre de PR ouvertes. */
+function RepoStatus({ item }: { item: Item }) {
+  const activity = item.type === "repo" ? item.repo_activity : null;
+  if (!activity) return null;
+  const ci = activity.ci_state;
+  return (
+    <span className="flex shrink-0 items-center gap-2">
+      {activity.open_pr_count ? (
+        <span className="inline-flex items-center gap-0.5 text-xs text-neutral-11" title="Pull requests ouvertes">
+          <GitPullRequest className="size-3.5" aria-hidden />
+          {activity.open_pr_count}
+          <span className="sr-only"> pull request(s) ouverte(s)</span>
+        </span>
+      ) : null}
+      {ci && ci in CI_BADGE && (
+        <Badge variant={CI_BADGE[ci as keyof typeof CI_BADGE]} className="shrink-0">
+          {CI_LABELS[ci as CiState]}
+        </Badge>
+      )}
+    </span>
+  );
+}
+
 function ToRead({ item }: { item: Item }) {
   if (item.type !== "link" || isRead(item)) return null;
   return (
@@ -131,6 +157,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                       <Attachments item={item} />
                       <ToRead item={item} />
                       <Task item={item} />
+                      <RepoStatus item={item} />
                       <PinMark pinned={item.pinned} />
                     </span>
                   </div>
@@ -181,6 +208,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                     <Attachments item={item} />
                     <ToRead item={item} />
                     <Task item={item} />
+                    <RepoStatus item={item} />
                     <OpenSite item={item} />
                   </div>
                 </TableCell>
@@ -220,6 +248,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             <Attachments item={item} />
             <ToRead item={item} />
             <Task item={item} />
+            <RepoStatus item={item} />
             {showType && (
               <span className="hidden sm:inline-flex">
                 <ItemTypeBadge type={item.type} />
