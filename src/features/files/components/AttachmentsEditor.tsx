@@ -1,12 +1,12 @@
 "use client";
 
-import { Download, FileText, Trash2 } from "lucide-react";
+import { Download, ExternalLink, FileText, Trash2 } from "lucide-react";
 import { useId, useState, useTransition } from "react";
 import { Button, IconButton } from "@/components/ui/core";
 import { toast } from "@/components/ui/overlays";
 import { formatDateTime } from "@/lib/format";
 import { deleteFile } from "../actions";
-import { fileHref, formatBytes, type ItemFile } from "../schemas";
+import { canOpenInBrowser, fileHref, formatBytes, type ItemFile } from "../schemas";
 import { sendFile } from "../send";
 import { DropZone } from "./DropZone";
 import { UploadList } from "./UploadList";
@@ -63,6 +63,13 @@ export function AttachmentsEditor({ itemId, files, label = "Fichiers" }: Attachm
                   {formatBytes(file.size_bytes)} · <time dateTime={file.created_at}>{formatDateTime(file.created_at)}</time>
                 </p>
               </div>
+              {canOpenInBrowser(file.mime_type) && (
+                <IconButton asChild variant="ghost" size="sm" aria-label={`Voir ${file.name} dans un nouvel onglet`}>
+                  <a href={fileHref(file.id)} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="size-4" />
+                  </a>
+                </IconButton>
+              )}
               <IconButton asChild variant="ghost" size="sm" aria-label={`Télécharger ${file.name}`}>
                 <a href={fileHref(file.id, true)} download={file.name}>
                   <Download className="size-4" />
