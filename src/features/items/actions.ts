@@ -120,6 +120,10 @@ export async function updateItem(
       patchData.url = canonical;
     }
   }
+  // Repo : nouvelle URL (ou retirée) → l'activité en cache ne correspond plus.
+  if (patchData.url !== undefined) {
+    await supabase.from("repo_activity").delete().eq("workspace_id", workspaceId).eq("item_id", parsedId.data);
+  }
   const { data, error } = await supabase
     .from("items")
     .update(patchData)

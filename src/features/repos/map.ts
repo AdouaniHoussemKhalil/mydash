@@ -21,8 +21,21 @@ export const PULL_LABELS: Record<PullState, string> = {
   closed: "Fermée",
 };
 
+/** Sections lues à part ; chacune demande sa permission sur le jeton. */
+export type Section = "commits" | "pulls" | "actions" | "issues";
+
+/** Permission « fine-grained » (lecture seule) nécessaire à chaque section. */
+export const SECTION_PERMISSIONS: Record<Section, string> = {
+  commits: "Contents",
+  pulls: "Pull requests",
+  actions: "Actions",
+  issues: "Issues",
+};
+
 /** Ce qui est enregistré dans repo_activity.snapshot et affiché. */
 export type RepoSnapshot = {
+  /** Sections refusées par GitHub (permission manquante sur le jeton). */
+  denied: Section[];
   repo: {
     fullName: string;
     description: string | null;
@@ -134,18 +147,30 @@ const truncate = (text: string, max: number) => (text.length > max ? `${text.sli
 /** Construit le résumé affiché à partir des réponses validées. */
 export function buildSnapshot(input: {
   repo: z.infer<typeof repoSchema>;
-  commits: z.infer<typeof commitsSchema>;
-  pulls: z.infer<typeof pullsSchema>;
-  runs: z.infer<typeof runsSchema>;
-  issues: z.infer<typeof issuesSchema>;
+  /** null : section refusée (permission manquante). */
+  commits: z.infer<typeof commitsSchema> | null;
+  pulls: z.infer<typeof pullsSchema> | null;
+  runs: z.infer<typeof runsSchema> | null;
+  issues: z.infer<typeof issuesSchema> | null;
   openPullCount: number;
 }): RepoSnapshot {
-  const { repo, commits, pulls, runs, issues, openPullCount } = input;
+  const { repo, openPullCount } = input;
+  const denied = (["commits", "pulls", "actions", "issues"] as const).filter(
+    (section) => input[section === "actions" ? "runs" : section] === null,
+  );
+  const commits = input.commits ?? [];
+  const pulls = input.pulls ?? [];
+  const runs = input.runs ?? { workflow_runs: [] };
+  const issues = input.issues ?? [];
   // Runs du plus récent au plus ancien (ordre de l'API).
-  const defaultRun = runs.workflow_runs.find((run) => run.head_branch === repo.default_branch);
+  // CI de la branche par défaut ; à défaut (CI seulement sur d'autres
+  // branches ou sur les PR), le run le plus récent, branche affichée.
+  const defaultRun =
+    runs.workflow_runs.find((run) => run.head_branch === repo.default_branch) ?? runs.workflow_runs[0];
   const runForSha = (sha: string) => runs.workflow_runs.find((run) => run.head_sha === sha);
 
   return {
+    denied,
     repo: {
       fullName: repo.full_name,
       description: repo.description ? truncate(repo.description, 300) : null,

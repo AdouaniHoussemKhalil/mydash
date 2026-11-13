@@ -20,5 +20,10 @@ export async function ItemRepoActivity({ itemId, url }: { itemId: string; url: s
       </p>
     );
   }
+  // Activité d'un autre dépôt (URL modifiée depuis) : ne pas l'afficher.
+  const current = `${repo.owner}/${repo.name}`.toLowerCase();
+  if (activity?.snapshot && activity.snapshot.repo.fullName.toLowerCase() !== current) {
+    activity = { snapshot: null, ciState: null, fetchedAt: null, fetchError: null };
+  }
   return <RepoActivityView itemId={itemId} isGithub={repo.provider === "github"} activity={activity} />;
 }

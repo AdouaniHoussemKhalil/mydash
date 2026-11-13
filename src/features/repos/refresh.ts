@@ -22,7 +22,7 @@ export async function refreshRepoActivity(itemId: string, force: boolean): Promi
   const supabase = await createClient();
   const { data: item } = await supabase
     .from("items")
-    .select("id, type, url, repo_activity(fetched_at)")
+    .select("id, type, url, repo_activity(fetched_at, snapshot)")
     .eq("workspace_id", workspaceId)
     .eq("id", itemId)
     .maybeSingle();
@@ -30,8 +30,11 @@ export async function refreshRepoActivity(itemId: string, force: boolean): Promi
   const repo = item.url ? repoFromHref(item.url) : null;
   if (!repo) return { ok: false, status: 400, error: "Ce repo n'a pas d'URL de dépôt" };
 
+  const cachedName = (item.repo_activity?.snapshot as { repo?: { fullName?: string } } | null)?.repo?.fullName;
+  // Cache d'un autre dépôt (URL modifiée) : jamais réutilisé.
+  const sameRepo = !cachedName || cachedName.toLowerCase() === `${repo.owner}/${repo.name}`.toLowerCase();
   const lastFetch = item.repo_activity?.fetched_at;
-  if (!force && lastFetch && Date.now() - new Date(lastFetch).getTime() < STALE_AFTER_MS) {
+  if (!force && sameRepo && lastFetch && Date.now() - new Date(lastFetch).getTime() < STALE_AFTER_MS) {
     return { ok: true, refreshed: false, error: null };
   }
 
@@ -48,8 +51,10 @@ export async function refreshRepoActivity(itemId: string, force: boolean): Promi
     };
   } catch (error) {
     fetchError = error instanceof GithubError ? error.message : "Activité GitHub indisponible.";
-    // On garde le dernier snapshot réussi ; seule l'erreur est enregistrée.
-    values = { fetched_at: new Date().toISOString(), fetch_error: fetchError };
+    // Même dépôt : on garde le dernier snapshot réussi. Autre dépôt : on l'efface.
+    values = sameRepo
+      ? { fetched_at: new Date().toISOString(), fetch_error: fetchError }
+      : { fetched_at: new Date().toISOString(), fetch_error: fetchError, snapshot: {}, ci_state: null, open_pr_count: null };
   }
 
   const { data: updated, error } = await supabase

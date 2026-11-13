@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Badge, Button, Skeleton } from "@/components/ui/core";
 import { formatDateTime, formatRelative } from "@/lib/format";
-import { CI_LABELS, type CiState, PULL_LABELS, type PullState } from "../map";
+import { CI_LABELS, type CiState, PULL_LABELS, type PullState, type Section, SECTION_PERMISSIONS } from "../map";
 import type { RepoActivity } from "../queries";
 
 const STALE_AFTER_MS = 10 * 60 * 1000;
@@ -109,6 +109,8 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
   }
 
   const snapshot = activity?.snapshot ?? null;
+  // Anciens snapshots : pas de champ denied.
+  const denied = new Set<Section>(snapshot?.denied ?? []);
   const error = requestError ?? activity?.fetchError ?? null;
 
   return (
@@ -162,6 +164,9 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
             </p>
           </div>
 
+          {denied.has("actions") ? (
+            <Denied section="actions" label="CI" />
+          ) : (
           <div className="flex flex-wrap items-center gap-2 rounded-lg border border-neutral-6 px-3 py-2 text-sm">
             <Badge variant={CI_VARIANT[snapshot.ci.state]}>{CI_LABELS[snapshot.ci.state]}</Badge>
             {snapshot.ci.workflow && (
@@ -175,8 +180,10 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
               </External>
             )}
           </div>
+          )}
 
           <ActivityList
+            denied={denied.has("pulls") ? "pulls" : undefined}
             title={`Pull requests · ${snapshot.openPullCount} ouverte${snapshot.openPullCount > 1 ? "s" : ""}`}
             icon={<GitPullRequest className="size-4" aria-hidden />}
             empty="Aucune pull request."
@@ -204,6 +211,7 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
           />
 
           <ActivityList
+            denied={denied.has("commits") ? "commits" : undefined}
             title="Derniers commits"
             icon={<GitCommitHorizontal className="size-4" aria-hidden />}
             empty="Aucun commit."
@@ -221,6 +229,7 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
           />
 
           <ActivityList
+            denied={denied.has("issues") ? "issues" : undefined}
             title="Issues ouvertes"
             icon={<CircleDot className="size-4" aria-hidden />}
             empty="Aucune issue ouverte."
@@ -247,8 +256,40 @@ export function RepoActivityView({ itemId, isGithub, activity }: RepoActivityVie
 
 type Row = { key: string; main: React.ReactNode; meta: React.ReactNode; badges?: React.ReactNode };
 
-function ActivityList({ title, icon, empty, items }: { title: string; icon: React.ReactNode; empty: string; items: Row[] }) {
+/** Section refusée par GitHub : indique la permission à ajouter au jeton. */
+function Denied({ section, label }: { section: Section; label: string }) {
+  return (
+    <p className="rounded-lg border border-dashed border-neutral-6 px-3 py-2 text-sm text-neutral-11">
+      {label} : accès refusé par le jeton. Ajoute la permission « {SECTION_PERMISSIONS[section]} » en lecture seule.
+    </p>
+  );
+}
+
+function ActivityList({
+  title,
+  icon,
+  empty,
+  items,
+  denied,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  empty: string;
+  items: Row[];
+  denied?: Section | undefined;
+}) {
   const id = useId();
+  if (denied) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <h4 className="flex items-center gap-1.5 text-xs font-medium text-neutral-11">
+          {icon}
+          {title.split(" · ")[0]}
+        </h4>
+        <Denied section={denied} label={title.split(" · ")[0] ?? title} />
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col gap-1.5">
       <h4 id={id} className="flex items-center gap-1.5 text-xs font-medium text-neutral-11">
