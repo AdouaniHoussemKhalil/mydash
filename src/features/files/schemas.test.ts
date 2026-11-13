@@ -3,7 +3,7 @@ import { fileInfoSchema, fileNameSchema, formatBytes, previewKind } from "./sche
 
 describe("fileNameSchema", () => {
   it("retire le chemin et les caractères de contrôle", () => {
-    expect(fileNameSchema.parse("C:\Users\moi\rapport\u0007.pdf")).toBe("rapport.pdf");
+    expect(fileNameSchema.parse(String.raw`C:\Users\moi\rapport` + "\u0007.pdf")).toBe("rapport.pdf");
     expect(fileNameSchema.parse("../../etc/passwd")).toBe("passwd");
   });
 

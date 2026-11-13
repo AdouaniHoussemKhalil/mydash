@@ -18,7 +18,7 @@ export const fileIdSchema = z.uuid("Fichier introuvable");
 /** Nom affiché : sans chemin ni caractères de contrôle, longueur bornée. */
 export const fileNameSchema = z
   .string()
-  .transform((name) => name.split(/[\/]/).pop()!.replace(/[\u0000-\u001f\u007f]/g, "").trim())
+  .transform((name) => name.split(/[\\/]/).pop()!.replace(/[\u0000-\u001f\u007f]/g, "").trim())
   .pipe(z.string().min(1, "Nom de fichier vide").max(FILE_NAME_MAX, `${FILE_NAME_MAX} caractères maximum`));
 
 /** Description d'un fichier avant envoi (ce que le navigateur annonce). */
