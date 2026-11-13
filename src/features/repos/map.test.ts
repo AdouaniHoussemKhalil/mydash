@@ -79,6 +79,24 @@ describe("buildSnapshot", () => {
   });
 });
 
+describe("CI sans run sur la branche par défaut", () => {
+  it("prend le run le plus récent, avec sa branche", () => {
+    const otherRuns = runsSchema.parse({ workflow_runs: [runs.workflow_runs[0]] });
+    const snapshot = buildSnapshot({ repo, commits, pulls, runs: otherRuns, issues, openPullCount: 0 });
+    expect(snapshot.ci).toMatchObject({ state: "failure", branch: "feature/x" });
+  });
+});
+
+describe("sections refusées", () => {
+  it("une permission manquante vide la section et la signale", () => {
+    const snapshot = buildSnapshot({ repo, commits, pulls, runs: null, issues: null, openPullCount: 2 });
+    expect(snapshot.denied).toEqual(["actions", "issues"]);
+    expect(snapshot.issues).toEqual([]);
+    expect(snapshot.ci.state).toBe("none");
+    expect(snapshot.commits).toHaveLength(2);
+  });
+});
+
 describe("validation des réponses", () => {
   it("refuse une URL non https venue de l'API", () => {
     expect(repoSchema.safeParse({ ...repo, html_url: "javascript:alert(1)" }).success).toBe(false);

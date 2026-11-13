@@ -39,11 +39,42 @@ describe("fetchRepoActivity : erreurs", () => {
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer ghp_faux");
   });
 
+  it("403 sur le dépôt : message de GitHub et piste de correction", async () => {
+    vi.stubEnv("GITHUB_TOKEN", "github_pat_faux");
+    vi.stubGlobal("fetch", vi.fn(async () => respond(403, { message: "Resource not accessible by personal access token" })));
+    await expect(fetchRepoActivity(github)).rejects.toThrow(
+      /Accès refusé par GitHub \(« Resource not accessible by personal access token » ?\)\..*Repository access/,
+    );
+  });
+
   it("GitLab et noms invalides : refusés sans appel réseau", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     await expect(fetchRepoActivity({ provider: "gitlab", owner: "g", name: "p" })).rejects.toThrow("GitHub uniquement");
     await expect(fetchRepoActivity({ provider: "github", owner: "..", name: "x" })).rejects.toThrow("Nom de dépôt invalide");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("fetchRepoActivity : permission manquante sur une section", () => {
+  it("issues refusées (403) : le reste s'affiche, la section est signalée", async () => {
+    vi.stubEnv("GITHUB_TOKEN", "github_pat_faux");
+    const repoBody = {
+      full_name: "vercel/next.js", description: null, stargazers_count: 1, forks_count: 0,
+      default_branch: "main", pushed_at: null, html_url: "https://github.com/vercel/next.js", private: true,
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.endsWith("/repos/vercel/next.js")) return respond(200, repoBody);
+        if (url.includes("/issues")) return respond(403, { message: "Resource not accessible by personal access token" });
+        if (url.includes("/actions/runs")) return respond(200, { workflow_runs: [] });
+        return respond(200, []);
+      }),
+    );
+    const snapshot = await fetchRepoActivity(github);
+    expect(snapshot.denied).toEqual(["issues"]);
+    expect(snapshot.repo.fullName).toBe("vercel/next.js");
+    expect(snapshot.ci.state).toBe("none");
   });
 });
