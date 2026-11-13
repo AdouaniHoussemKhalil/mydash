@@ -76,6 +76,11 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
   - Le navigateur envoie le fichier directement à Storage, par une URL signée. La lecture passe par des URL signées valables 10 minutes.
   - Storage n'accepte la suppression que par son API : supprimer un élément supprime donc aussi ses fichiers stockés, depuis l'action serveur.
 - **Tâches** : l'état (`todo`, `doing` ou `done`) et l'échéance (type `date`) sont dans `task_details`, en relation 1-1 avec l'élément. Une ligne est créée pour chaque tâche. Le retard se calcule dans le navigateur, d'après la date locale de l'utilisateur.
+- **Activité GitHub des repos** : l'état de la CI, les PR (avec leur CI), les derniers commits et les issues sont lus par l'API GitHub, côté serveur, via la route `POST /api/items/[id]/github`.
+  - Le résultat est gardé dans `repo_activity`. Il est rafraîchi à l'ouverture d'un repo s'il a plus de 10 minutes, ou à la demande avec le bouton « Actualiser ».
+  - Sans jeton, seuls les dépôts publics sont suivis, avec 60 requêtes par heure (environ 10 rafraîchissements).
+  - Avec `GITHUB_TOKEN`, les dépôts privés sont suivis aussi, avec 5 000 requêtes par heure. Voir `.env.example`.
+  - Le suivi est limité à GitHub pour l'instant : GitLab n'est pas pris en charge.
 
 ## Scripts
 
@@ -118,7 +123,7 @@ Le nom exact d'une page, par exemple « inbox », ouvre cette page.
 
 ## Variables d'environnement
 
-Toutes les variables sont documentées dans [`.env.example`](.env.example) et validées au démarrage par [`src/lib/env.ts`](src/lib/env.ts). `.env.local` n'est jamais commité. Aucune clé `service_role` n'est utilisée côté client.
+Toutes les variables sont documentées dans [`.env.example`](.env.example). Les variables publiques sont validées au démarrage par [`src/lib/env.ts`](src/lib/env.ts). `GITHUB_TOKEN` est facultatif et reste côté serveur ([`src/lib/server-env.ts`](src/lib/server-env.ts)). `.env.local` n'est jamais commité. Aucune clé `service_role` n'est utilisée côté client.
 
 ## Structure
 
