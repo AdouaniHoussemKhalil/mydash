@@ -5,7 +5,33 @@ export type Database = {
   
   "public": {
           Tables: {
-            "item_links": {
+            "item_files": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"id": string,"item_id": string,"mime_type": string,"name": string,"size_bytes": number,"storage_path": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"item_id": string,"mime_type"?: string,"name": string,"size_bytes": number,"storage_path": string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"item_id"?: string,"mime_type"?: string,"name"?: string,"size_bytes"?: number,"storage_path"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "item_files_item_id_workspace_id_fkey"
+      columns: ["item_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "items"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "item_files_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"item_links": {
                   Row: {
                     "created_at": string,"from_item": string,"relation": string,"to_item": string,"workspace_id": string
                   }
@@ -223,6 +249,12 @@ isOneToOne: false
                            },
 "is_owner":
 { Args: { "ws": string }; Returns: boolean
+                           },
+"storage_item_in_workspace":
+{ Args: { "object_name": string }; Returns: boolean
+                           },
+"storage_workspace_id":
+{ Args: { "object_name": string }; Returns: string
                            }
           }
           Enums: {

@@ -1,6 +1,7 @@
 "use server";
 
 import { refresh } from "next/cache";
+import { removeStoredObjects, storagePathsOf } from "@/features/files";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { writeLinkMeta } from "./link-meta";
@@ -70,6 +71,8 @@ export async function deleteItem(id: unknown): Promise<ActionResult> {
 
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
+  // Chemins lus avant : la cascade efface les lignes, pas les objets stockés.
+  const storedFiles = await storagePathsOf(parsed.data);
   const { error, count } = await supabase
     .from("items")
     .delete({ count: "exact" })
@@ -77,6 +80,7 @@ export async function deleteItem(id: unknown): Promise<ActionResult> {
     .eq("id", parsed.data);
   if (error) return { ok: false, error: "Suppression impossible. Réessaie." };
   if (!count) return { ok: false, error: "Élément introuvable ou accès refusé" };
+  await removeStoredObjects(storedFiles);
 
   refresh();
   return { ok: true, data: undefined };

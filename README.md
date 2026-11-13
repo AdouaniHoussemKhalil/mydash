@@ -71,6 +71,10 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
   - http et https uniquement, sur les ports 80, 443, 8080 et 8443 ;
   - adresses privées, locales et réservées refusées, y compris après redirection et au moment de la connexion (pas de contournement par DNS) ;
   - 5 s et 512 Ko maximum, 3 redirections au plus.
+- **Fichiers** : ils sont stockés dans l'espace Supabase Storage privé `files`, au chemin `<workspace>/<item>/<uuid>`, avec 50 Mo maximum par fichier. Leurs métadonnées sont dans `item_files`.
+  - Les règles d'accès Storage reprennent celles du workspace : lecture pour les membres, dépôt et suppression pour `owner` et `editor`, et seulement pour un élément existant.
+  - Le navigateur envoie le fichier directement à Storage, par une URL signée. La lecture passe par des URL signées valables 10 minutes.
+  - Storage n'accepte la suppression que par son API : supprimer un élément supprime donc aussi ses fichiers stockés, depuis l'action serveur.
 
 ## Scripts
 
