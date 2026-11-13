@@ -14,6 +14,7 @@ import type { ViewMode } from "@/features/shell";
 import { excerpt, formatDateTime, formatRelative } from "@/lib/format";
 import { displayHost } from "@/lib/url";
 import { cn } from "@quickadui/utils";
+import { RemoteImage } from "@/components/RemoteImage";
 import { type Item, isRead } from "../schemas";
 import { ItemTypeBadge } from "./ItemTypeBadge";
 
@@ -48,10 +49,17 @@ function PinMark({ pinned }: { pinned: boolean }) {
   return <Pin className="size-3.5 shrink-0 text-accent-11" aria-label="Épinglé" />;
 }
 
-/** Sous-titre : hôte du lien, sinon extrait du contenu. */
+/** Sous-titre : site du lien, sinon extrait du contenu. */
 function subtitle(item: Item, length?: number) {
-  if (item.url) return displayHost(item.url) ?? item.url;
+  if (item.url) return item.link_meta?.site_name ?? displayHost(item.url) ?? item.url;
   return item.body ? excerpt(item.body, length) : null;
+}
+
+/** Favicon du site (liens), à la place du repère d'épinglage absent. */
+function Favicon({ item }: { item: Item }) {
+  const src = item.url ? item.link_meta?.favicon_url : null;
+  if (!src) return null;
+  return <RemoteImage src={src} className="size-4 shrink-0 rounded-sm" />;
 }
 
 /** Ouvre le site dans un nouvel onglet (hors du lien vers le détail). */
@@ -87,10 +95,13 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             <Link href={href(item.id)} scroll={false} className="block h-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent-8">
               <Card
                 className={cn(
-                  "h-full transition-colors hover:border-neutral-8",
+                  "h-full overflow-hidden transition-colors hover:border-neutral-8",
                   item.id === selectedId && "border-accent-8",
                 )}
               >
+                {item.url && item.link_meta?.image_url && (
+                  <RemoteImage src={item.link_meta.image_url} className="h-32 w-full object-cover" />
+                )}
                 <CardHeader className="gap-2">
                   <div className="flex items-center justify-between gap-2">
                     {showType ? <ItemTypeBadge type={item.type} /> : <span />}
@@ -99,9 +110,17 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                       <PinMark pinned={item.pinned} />
                     </span>
                   </div>
-                  <CardTitle className="line-clamp-2 text-base">{item.title}</CardTitle>
+                  <CardTitle className="flex items-start gap-2 text-base">
+                    <span className="mt-1 empty:hidden">
+                      <Favicon item={item} />
+                    </span>
+                    <span className="line-clamp-2">{item.title}</span>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
+                  {item.url && item.link_meta?.description && (
+                    <p className="line-clamp-3 text-sm text-neutral-11">{item.link_meta.description}</p>
+                  )}
                   {subtitle(item) && <p className="line-clamp-3 text-sm break-words text-neutral-11">{subtitle(item)}</p>}
                   <Updated date={item.updated_at} />
                 </CardContent>
@@ -132,6 +151,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                   <div className="flex items-center gap-2">
                     <Link href={href(item.id)} scroll={false} className="flex min-w-0 items-center gap-2 font-medium text-neutral-12 hover:underline">
                       <PinMark pinned={item.pinned} />
+                      <Favicon item={item} />
                       <span className="truncate">{item.title}</span>
                     </Link>
                     <ToRead item={item} />
@@ -166,6 +186,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
             className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-8"
           >
             <PinMark pinned={item.pinned} />
+            <Favicon item={item} />
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-neutral-12">{item.title}</p>
               {subtitle(item, 120) && <p className="truncate text-sm text-neutral-11">{subtitle(item, 120)}</p>}

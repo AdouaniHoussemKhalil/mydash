@@ -1,6 +1,6 @@
 import { getActiveWorkspaceId } from "@/features/workspace";
 import { createClient } from "@/lib/supabase/server";
-import { type Item, ITEM_COLUMNS, itemIdSchema } from "./schemas";
+import { type Item, ITEM_COLUMNS, ITEM_FIELDS, itemIdSchema } from "./schemas";
 import { toPrefixQuery } from "./search";
 
 export { getActiveWorkspaceId };
@@ -54,8 +54,8 @@ export async function listItems({
   return (data as unknown as Item[]).map(pickItem);
 }
 
-// Clés d'Item : colonnes simples + la relation link_meta (sans ses champs).
-const ITEM_KEYS = ITEM_COLUMNS.split(", ").map((column) => column.replace(/\(.*\)$/, "")) as (keyof Item)[];
+// Clés d'Item : colonnes simples + la relation link_meta.
+const ITEM_KEYS = [...ITEM_FIELDS.split(", "), "link_meta"] as (keyof Item)[];
 
 function pickItem(row: Item): Item {
   return Object.fromEntries(ITEM_KEYS.map((key) => [key, row[key]])) as Item;
