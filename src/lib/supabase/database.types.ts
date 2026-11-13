@@ -111,14 +111,14 @@ isOneToOne: false
                   ]
                 },"link_meta": {
                   Row: {
-                    "created_at": string,"is_read": boolean,"item_id": string,"updated_at": string,"workspace_id": string
+                    "created_at": string,"description": string | null,"favicon_url": string | null,"fetch_error": string | null,"fetched_at": string | null,"image_url": string | null,"is_read": boolean,"item_id": string,"page_title": string | null,"site_name": string | null,"updated_at": string,"workspace_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"is_read"?: boolean,"item_id": string,"updated_at"?: string,"workspace_id": string
+                    "created_at"?: string,"description"?: string | null,"favicon_url"?: string | null,"fetch_error"?: string | null,"fetched_at"?: string | null,"image_url"?: string | null,"is_read"?: boolean,"item_id": string,"page_title"?: string | null,"site_name"?: string | null,"updated_at"?: string,"workspace_id": string
                   }
                   Update: {
-                    "created_at"?: string,"is_read"?: boolean,"item_id"?: string,"updated_at"?: string,"workspace_id"?: string
+                    "created_at"?: string,"description"?: string | null,"favicon_url"?: string | null,"fetch_error"?: string | null,"fetched_at"?: string | null,"image_url"?: string | null,"is_read"?: boolean,"item_id"?: string,"page_title"?: string | null,"site_name"?: string | null,"updated_at"?: string,"workspace_id"?: string
                   }
                   Relationships: [
                     {

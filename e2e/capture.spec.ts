@@ -24,12 +24,12 @@ test.describe("capture → recherche", () => {
 
     // URL → lien
     input = await openPalette(page);
-    await input.fill("example.com/article");
-    await expect(page.getByRole("option", { name: /Lien : example\.com\/article/ })).toBeVisible();
+    await input.fill("example.test/article");
+    await expect(page.getByRole("option", { name: /Lien : example\.test\/article/ })).toBeVisible();
     await input.press("Enter");
     await expect(page).toHaveURL(/\/links\?item=/);
     await expect(page.getByRole("complementary", { name: /Détail/ }).getByLabel("URL")).toHaveValue(
-      "https://example.com/article",
+      "https://example.test/article",
     );
 
     // Retrouver par préfixe, sans accent exact sur le début du mot
@@ -49,7 +49,7 @@ test.describe("capture → recherche", () => {
     await expect(page.getByRole("option", { name: "Inbox", exact: true })).toHaveAttribute("aria-selected", "true");
     await input.press("Enter");
     await expect(page).toHaveURL(/\/inbox$/);
-    for (const title of ["Idée géniale pour MyDash", "vercel/next.js", "example.com/article"]) {
+    for (const title of ["Idée géniale pour MyDash", "vercel/next.js", "example.test/article"]) {
       await expect(page.getByRole("link", { name: new RegExp(title.replace(/[./]/g, "\\$&")) })).toBeVisible();
     }
   });

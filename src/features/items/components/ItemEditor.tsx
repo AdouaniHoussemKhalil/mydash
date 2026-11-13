@@ -101,6 +101,15 @@ export function ItemEditor({ item, relations }: { item: Item; relations?: ReactN
     saveRef.current = save;
   }, [save]);
 
+  // Titre de la page trouvé par l'aperçu, déjà enregistré côté serveur :
+  // l'afficher, sauf si le titre est en cours de modification.
+  const applyServerTitle = useCallback((title: string) => {
+    if (draftRef.current.title !== saved.current.title) return;
+    saved.current = { ...saved.current, title };
+    draftRef.current = { ...draftRef.current, title };
+    setDraft(draftRef.current);
+  }, []);
+
   const schedule = (next: Draft) => {
     draftRef.current = next;
     setDraft(next);
@@ -178,7 +187,7 @@ export function ItemEditor({ item, relations }: { item: Item; relations?: ReactN
         {titleEmpty && <p className="px-2 text-xs text-danger-11">Le titre est obligatoire.</p>}
       </div>
 
-      {item.type === "link" && <LinkFields item={item} />}
+      {item.type === "link" && <LinkFields item={item} onPreviewTitle={applyServerTitle} />}
 
       <div className="flex flex-col gap-1">
         <label htmlFor={`body-${item.id}`} className="sr-only">

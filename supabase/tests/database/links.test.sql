@@ -1,7 +1,7 @@
 -- Tests des liens (URL, link_meta). Lancer : npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(11);
 
 create temp table ids (name text primary key, id uuid not null);
 grant select on ids to authenticated;
@@ -52,6 +52,14 @@ select throws_ok(
 select throws_ok(
   $$update public.link_meta set workspace_id = (select id from ids where name = 'ws_bob')$$,
   '42501', null, 'link_meta : workspace_id n''est pas modifiable');
+
+select lives_ok(
+  $$update public.link_meta set page_title = 'Docs', image_url = 'https://nextjs.org/og.png',
+      fetched_at = now()$$,
+  'owner : peut enregistrer l''aperçu');
+select throws_ok(
+  $$update public.link_meta set image_url = 'javascript:alert(1)'$$,
+  '23514', null, 'une image d''aperçu non http(s) est refusée');
 
 -- ── Bob (étranger) ──
 select set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","role":"authenticated"}', true);
