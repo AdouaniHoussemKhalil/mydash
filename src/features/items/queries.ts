@@ -65,7 +65,7 @@ export async function listItems({
 }
 
 // Clés d'Item : colonnes simples + les relations (link_meta, item_files, task_details).
-const ITEM_KEYS = [...ITEM_FIELDS.split(", "), "link_meta", "item_files", "task_details"] as (keyof Item)[];
+const ITEM_KEYS = [...ITEM_FIELDS.split(", "), "link_meta", "item_files", "task_details", "repo_activity"] as (keyof Item)[];
 
 function pickItem(row: Item): Item {
   return Object.fromEntries(ITEM_KEYS.map((key) => [key, row[key]])) as Item;

@@ -75,7 +75,7 @@ export const LINK_META_FIELDS =
 export const ITEM_FILE_FIELDS = "name, mime_type, size_bytes" as const;
 
 export const ITEM_COLUMNS =
-  `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS}), item_files(${ITEM_FILE_FIELDS}), task_details(status, due_date)` as const;
+  `${ITEM_FIELDS}, link_meta(${LINK_META_FIELDS}), item_files(${ITEM_FILE_FIELDS}), task_details(status, due_date), repo_activity(ci_state, open_pr_count)` as const;
 
 export type LinkMeta = Pick<
   Tables<"link_meta">,
@@ -100,6 +100,7 @@ export type Item = Pick<
   link_meta: LinkMeta | null;
   item_files: Pick<Tables<"item_files">, "name" | "mime_type" | "size_bytes">[];
   task_details: Pick<Tables<"task_details">, "status" | "due_date"> | null;
+  repo_activity: Pick<Tables<"repo_activity">, "ci_state" | "open_pr_count"> | null;
 };
 
 /** Un lien est « lu » seulement si on l'a marqué comme tel. */
