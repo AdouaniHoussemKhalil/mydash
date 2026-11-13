@@ -90,8 +90,8 @@ jobs:
         with:
           version: 3.1.0
 
-      - name: Démarrer Supabase (base, auth, API)
-        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor,mailpit
+      - name: Démarrer Supabase (base, auth, API, stockage)
+        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,realtime,postgres-meta,supavisor,mailpit
 
       - name: Écrire .env.local depuis le Supabase local
         run: |
