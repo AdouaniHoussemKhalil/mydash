@@ -97,7 +97,7 @@ Prérequis : Supabase local démarré (`npm run db:start`), `.env.local` rempli 
 - **Projet `desktop`** : parcours capture → recherche, dans `e2e/capture.spec.ts`.
 - **Projet `mobile`** : parcours sur Pixel 7, dans `e2e/mobile.spec.ts`.
 
-La CI les exécute dans le job `e2e`, avec un Supabase allégé (base, auth, API).
+La CI les exécute dans le job `e2e`, avec un Supabase allégé (base, auth, API, stockage).
 
 ## Raccourcis clavier
 

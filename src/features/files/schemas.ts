@@ -41,6 +41,11 @@ export function storagePath(workspaceId: string, itemId: string, fileId: string)
   return `${workspaceId}/${itemId}/${fileId}`;
 }
 
+/** Lien stable vers un fichier (redirige vers une URL signée fraîche). */
+export function fileHref(fileId: string, download = false) {
+  return `/api/files/${fileId}${download ? "?download=1" : ""}`;
+}
+
 /** Taille lisible : « 12 Ko », « 3,4 Mo ». */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} o`;

@@ -106,26 +106,3 @@ export async function deleteFile(fileId: unknown): Promise<ActionResult> {
   refresh();
   return { ok: true, data: undefined };
 }
-
-/** URL signée (10 min) pour afficher ou télécharger un fichier. */
-export async function getFileUrl(fileId: unknown, download: unknown = false): Promise<ActionResult<{ url: string }>> {
-  const parsed = fileIdSchema.safeParse(fileId);
-  if (!parsed.success) return { ok: false, error: "Fichier introuvable" };
-
-  const workspaceId = await getActiveWorkspaceId();
-  const supabase = await createClient();
-  const { data: file } = await supabase
-    .from("item_files")
-    .select("storage_path, name")
-    .eq("workspace_id", workspaceId)
-    .eq("id", parsed.data)
-    .maybeSingle();
-  if (!file) return { ok: false, error: "Fichier introuvable" };
-
-  const { data, error } = await supabase.storage
-    .from(FILES_BUCKET)
-    .createSignedUrl(file.storage_path, 600, download === true ? { download: file.name } : undefined);
-  if (error || !data) return { ok: false, error: "Lien du fichier indisponible" };
-  return { ok: true, data: { url: data.signedUrl } };
-}
-
