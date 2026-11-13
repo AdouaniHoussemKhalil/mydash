@@ -21,6 +21,9 @@ test.describe("capture → recherche", () => {
     await input.press("Enter");
     await expect(page).toHaveURL(/\/repos\?item=/);
     await expect(detailTitle(page)).toHaveValue("vercel/next.js");
+    await expect(page.getByRole("complementary", { name: /Détail/ }).getByLabel("URL du dépôt")).toHaveValue(
+      "https://github.com/vercel/next.js",
+    );
 
     // URL → lien
     input = await openPalette(page);
