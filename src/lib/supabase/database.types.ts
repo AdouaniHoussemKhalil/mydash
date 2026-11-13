@@ -201,6 +201,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_details": {
+                  Row: {
+                    "created_at": string,"due_date": string | null,"item_id": string,"status": Database["public"]['Enums']["task_status"],"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"due_date"?: string | null,"item_id": string,"status"?: Database["public"]['Enums']["task_status"],"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"due_date"?: string | null,"item_id"?: string,"status"?: Database["public"]['Enums']["task_status"],"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_details_item_id_workspace_id_fkey"
+      columns: ["item_id","workspace_id"]
+isOneToOne: true
+      referencedRelation: "items"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "task_details_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"workspace_members": {
                   Row: {
                     "created_at": string,"role": Database["public"]['Enums']["member_role"],"user_id": string,"workspace_id": string
@@ -258,7 +284,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "item_type": "link"|"note"|"doc"|"file"|"repo"|"tool"|"prompt"|"skill"|"snippet"|"task"|"event","member_role": "owner"|"editor"|"viewer"
+            "item_type": "link"|"note"|"doc"|"file"|"repo"|"tool"|"prompt"|"skill"|"snippet"|"task"|"event","member_role": "owner"|"editor"|"viewer","task_status": "todo"|"doing"|"done"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -374,7 +400,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "item_type": ["link", "note", "doc", "file", "repo", "tool", "prompt", "skill", "snippet", "task", "event"],"member_role": ["owner", "editor", "viewer"]
+            "item_type": ["link", "note", "doc", "file", "repo", "tool", "prompt", "skill", "snippet", "task", "event"],"member_role": ["owner", "editor", "viewer"],"task_status": ["todo", "doing", "done"]
           }
         }
 } as const
