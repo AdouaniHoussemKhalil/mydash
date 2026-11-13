@@ -159,8 +159,7 @@ export function CommandPalette() {
             type: detected.type,
             title: detected.title,
             body: detected.body,
-            // Les repos gardent l'URL dans le contenu tant que leur module n'est pas fait.
-            ...(detected.type === "link" ? { url: detected.url } : {}),
+            ...(detected.type === "link" || detected.type === "repo" ? { url: detected.url } : {}),
           });
           if (!result.ok) {
             toast({ title: result.error, variant: "danger" });

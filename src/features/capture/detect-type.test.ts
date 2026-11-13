@@ -75,6 +75,8 @@ describe("detectCapture", () => {
       const capture = detectCapture(input);
       expect(capture?.type).toBe("repo");
       expect(capture?.title).toBe(`${owner}/${name}`);
+      // URL canonique du dépôt, contenu vide.
+      expect(capture).toMatchObject({ url: `https://github.com/${owner}/${name}`, body: "" });
     });
 
     it("GitLab avec sous-groupes", () => {

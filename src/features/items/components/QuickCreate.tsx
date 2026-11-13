@@ -6,6 +6,7 @@ import { type FormEvent, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/core";
 import { Input } from "@/components/ui/forms";
 import { withSearchParams } from "@/features/shell";
+import { parseRepo, repoUrl } from "@/lib/repo";
 import { parseUrl, urlTitle } from "@/lib/url";
 import { createItem } from "../actions";
 import type { Item } from "../schemas";
@@ -32,10 +33,18 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
     if (!title.trim()) return;
     setError(null);
     startTransition(async () => {
-      // Module Liens : une URL collée devient l'URL du lien, avec un titre lisible.
-      const url = type === "link" ? parseUrl(title) : null;
+      // Liens : une URL collée devient l'URL du lien, avec un titre lisible.
+      // Repos : l'URL d'un dépôt donne « owner/repo » et l'URL canonique.
+      const url = type === "link" || type === "repo" ? parseUrl(title) : null;
+      const repo = type === "repo" && url ? parseRepo(url) : null;
+      if (type === "repo" && url && !repo) {
+        setError("Ce n'est pas l'URL d'un dépôt GitHub ou GitLab");
+        return;
+      }
       const result = await createItem(
-        url
+        repo
+          ? { type, title: `${repo.owner}/${repo.name}`, url: repoUrl(repo) }
+          : url
           ? { type, title: urlTitle(url), url: url.toString() }
           : type === "task"
             ? { type, title, task: { due_date: due || null } }
@@ -64,11 +73,15 @@ export function QuickCreate({ type, itemLabel }: QuickCreateProps) {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder={
-            type === "link" ? "Lien : colle une URL (ou un titre), puis Entrée" : `${itemLabel} : un titre suffit, puis Entrée`
+            type === "link"
+              ? "Lien : colle une URL (ou un titre), puis Entrée"
+              : type === "repo"
+                ? "Repo : colle l'URL du dépôt GitHub ou GitLab, puis Entrée"
+                : `${itemLabel} : un titre suffit, puis Entrée`
           }
           aria-label={label}
           aria-invalid={error ? true : undefined}
-          maxLength={type === "link" ? 2048 : 500}
+          maxLength={type === "link" || type === "repo" ? 2048 : 500}
           startIcon={<Plus className="size-4" />}
           disabled={isPending}
         />

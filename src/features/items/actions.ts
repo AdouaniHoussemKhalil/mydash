@@ -8,7 +8,16 @@ import { writeLinkMeta } from "./link-meta";
 import { writeTaskDetails } from "./task-details";
 import { taskPatchSchema } from "./tasks";
 import { getActiveWorkspaceId, LINK_RELATION, searchItems } from "./queries";
+import { repoFromHref, repoUrl } from "@/lib/repo";
 import { parseUrl, urlTitle } from "@/lib/url";
+
+const NOT_A_REPO = "Ce n'est pas l'URL d'un dépôt GitHub ou GitLab";
+
+/** URL d'un repo : celle d'un dépôt, ramenée à sa forme canonique. */
+function canonicalRepoUrl(url: string): string | null {
+  const repo = repoFromHref(url);
+  return repo ? repoUrl(repo) : null;
+}
 import {
   type ActionResult,
   createItemSchema,
@@ -30,6 +39,11 @@ export async function createItem(
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
   const { task, ...fields } = parsed.data;
+  if (fields.type === "repo" && fields.url) {
+    const canonical = canonicalRepoUrl(fields.url);
+    if (!canonical) return { ok: false, error: NOT_A_REPO };
+    fields.url = canonical;
+  }
   const { data, error } = await supabase
     .from("items")
     .insert({ ...fields, workspace_id: workspaceId })
@@ -91,9 +105,24 @@ export async function updateItem(
 
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
+  const patchData = { ...parsed.data };
+  // Un repo ne peut pointer que vers un dépôt.
+  if (patchData.url) {
+    const { data: current } = await supabase
+      .from("items")
+      .select("type")
+      .eq("workspace_id", workspaceId)
+      .eq("id", parsedId.data)
+      .maybeSingle();
+    if (current?.type === "repo") {
+      const canonical = canonicalRepoUrl(patchData.url);
+      if (!canonical) return { ok: false, error: NOT_A_REPO };
+      patchData.url = canonical;
+    }
+  }
   const { data, error } = await supabase
     .from("items")
-    .update(parsed.data)
+    .update(patchData)
     .eq("workspace_id", workspaceId)
     .eq("id", parsedId.data)
     .select("updated_at")
