@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { EmptyState } from "@/components/EmptyState";
-import { ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
+import { FileDropCreate } from "@/features/files";
+import { createItem, ItemDetail, ItemsView, listItems, QuickCreate } from "@/features/items";
 import { listTags, TagFilter } from "@/features/tags";
 import {
   CollectionView,
@@ -70,7 +71,12 @@ async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
               <div className="flex-1">
-                {!archived && <QuickCreate type={definition.type} itemLabel={definition.itemLabel} />}
+                {!archived &&
+                  (definition.type === "file" ? (
+                    <FileDropCreate createItem={createItem} />
+                  ) : (
+                    <QuickCreate type={definition.type} itemLabel={definition.itemLabel} />
+                  ))}
                 {archived && <p className="text-sm text-neutral-11">Éléments archivés de {definition.label}.</p>}
               </div>
               <Link
@@ -94,7 +100,11 @@ async function ModuleContent({ params, searchParams }: PageProps<"/[module]">) {
                   <EmptyState
                     icon={<Icon />}
                     title={`Aucun élément dans ${definition.label}`}
-                    description="Tape un titre ci-dessus, ou capture depuis n'importe où avec Ctrl+K."
+                    description={
+                      definition.type === "file"
+                        ? "Dépose des fichiers ci-dessus : chacun devient un élément."
+                        : "Tape un titre ci-dessus, ou capture depuis n'importe où avec Ctrl+K."
+                    }
                   />
                 )
               }

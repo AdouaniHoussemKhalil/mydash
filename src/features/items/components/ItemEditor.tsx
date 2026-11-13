@@ -31,7 +31,16 @@ const SAVE_LABELS: Record<SaveState, string> = {
  * (pause de frappe ou perte de focus), actions rapides à côté.
  * Monté avec key={item.id} : l'état local repart à chaque élément.
  */
-export function ItemEditor({ item, relations }: { item: Item; relations?: ReactNode }) {
+export function ItemEditor({
+  item,
+  preview,
+  relations,
+}: {
+  item: Item;
+  /** Affiché sous le titre (ex. aperçu d'un fichier). */
+  preview?: ReactNode;
+  relations?: ReactNode;
+}) {
   const [draft, setDraft] = useState<Draft>({ title: item.title, body: item.body });
   const [flags, setFlags] = useState({
     pinned: item.pinned,
@@ -187,6 +196,7 @@ export function ItemEditor({ item, relations }: { item: Item; relations?: ReactN
         {titleEmpty && <p className="px-2 text-xs text-danger-11">Le titre est obligatoire.</p>}
       </div>
 
+      {preview}
       {item.type === "link" && <LinkFields item={item} onPreviewTitle={applyServerTitle} />}
 
       <div className="flex flex-col gap-1">

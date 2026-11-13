@@ -1,4 +1,4 @@
-import { ExternalLink, Pin } from "lucide-react";
+import { ExternalLink, Paperclip, Pin } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Badge, Card, CardContent, CardHeader, CardTitle, IconButton } from "@/components/ui/core";
@@ -15,6 +15,7 @@ import { excerpt, formatDateTime, formatRelative } from "@/lib/format";
 import { displayHost } from "@/lib/url";
 import { cn } from "@quickadui/utils";
 import { RemoteImage } from "@/components/RemoteImage";
+import { fileKindLabel, formatBytes } from "@/features/files";
 import { type Item, isRead } from "../schemas";
 import { ItemTypeBadge } from "./ItemTypeBadge";
 
@@ -49,8 +50,10 @@ function PinMark({ pinned }: { pinned: boolean }) {
   return <Pin className="size-3.5 shrink-0 text-accent-11" aria-label="Épinglé" />;
 }
 
-/** Sous-titre : site du lien, sinon extrait du contenu. */
+/** Sous-titre : type et taille d'un fichier, site d'un lien, sinon extrait du contenu. */
 function subtitle(item: Item, length?: number) {
+  const file = item.type === "file" ? item.item_files[0] : undefined;
+  if (file) return `${fileKindLabel(file.name, file.mime_type)} · ${formatBytes(file.size_bytes)}`;
   if (item.url) return item.link_meta?.site_name ?? displayHost(item.url) ?? item.url;
   return item.body ? excerpt(item.body, length) : null;
 }
@@ -71,6 +74,19 @@ function OpenSite({ item, className }: { item: Item; className?: string | undefi
         <ExternalLink className="size-4" />
       </a>
     </IconButton>
+  );
+}
+
+/** Nombre de pièces jointes (hors module Fichiers, où le fichier est l'élément). */
+function Attachments({ item }: { item: Item }) {
+  const count = item.type === "file" ? item.item_files.length - 1 : item.item_files.length;
+  if (count <= 0) return null;
+  return (
+    <span className="inline-flex shrink-0 items-center gap-0.5 text-xs text-neutral-11" title={`${count} fichier(s) joint(s)`}>
+      <Paperclip className="size-3.5" aria-hidden />
+      {count}
+      <span className="sr-only"> fichier(s) joint(s)</span>
+    </span>
   );
 }
 
@@ -106,6 +122,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                   <div className="flex items-center justify-between gap-2">
                     {showType ? <ItemTypeBadge type={item.type} /> : <span />}
                     <span className="flex items-center gap-2">
+                      <Attachments item={item} />
                       <ToRead item={item} />
                       <PinMark pinned={item.pinned} />
                     </span>
@@ -154,6 +171,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
                       <Favicon item={item} />
                       <span className="truncate">{item.title}</span>
                     </Link>
+                    <Attachments item={item} />
                     <ToRead item={item} />
                     <OpenSite item={item} />
                   </div>
@@ -191,6 +209,7 @@ export function ItemsView({ items, view, selectedId, empty, showType = false, li
               <p className="truncate font-medium text-neutral-12">{item.title}</p>
               {subtitle(item, 120) && <p className="truncate text-sm text-neutral-11">{subtitle(item, 120)}</p>}
             </div>
+            <Attachments item={item} />
             <ToRead item={item} />
             {showType && (
               <span className="hidden sm:inline-flex">
