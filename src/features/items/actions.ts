@@ -5,7 +5,8 @@ import { removeStoredObjects, storagePathsOf } from "@/features/files";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { writeLinkMeta } from "./link-meta";
-import { getActiveWorkspaceId, searchItems } from "./queries";
+import { getActiveWorkspaceId, LINK_RELATION, searchItems } from "./queries";
+import { parseUrl, urlTitle } from "@/lib/url";
 import {
   type ActionResult,
   createItemSchema,
@@ -98,6 +99,79 @@ export async function setLinkRead(id: unknown, isRead: unknown): Promise<ActionR
   const supabase = await createClient();
   const written = await writeLinkMeta(supabase, workspaceId, parsedId.data, { is_read: parsedRead.data });
   if (!written) return { ok: false, error: "Élément introuvable ou accès refusé" };
+
+  refresh();
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Attache un lien à un élément : réutilise le lien de même URL s'il existe
+ * dans le workspace, sinon le crée (visible aussi dans le module Liens).
+ */
+export async function attachLink(
+  itemId: unknown,
+  rawUrl: unknown,
+): Promise<ActionResult<{ id: string; created: boolean }>> {
+  const parsedId = itemIdSchema.safeParse(itemId);
+  if (!parsedId.success) return { ok: false, error: "Élément introuvable" };
+  const url = typeof rawUrl === "string" ? parseUrl(rawUrl) : null;
+  if (!url) return { ok: false, error: "URL invalide (http ou https)" };
+  const href = url.toString();
+
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("items")
+    .select("id")
+    .eq("workspace_id", workspaceId)
+    .eq("type", "link")
+    .eq("url", href)
+    .limit(1)
+    .maybeSingle();
+
+  let linkId = existing?.id;
+  if (!linkId) {
+    const { data: created, error } = await supabase
+      .from("items")
+      // Rattaché à un élément : déjà classé, pas dans l'Inbox.
+      .insert({ workspace_id: workspaceId, type: "link", title: urlTitle(url), url: href, in_inbox: false })
+      .select("id")
+      .single();
+    if (error || !created) return { ok: false, error: "Création du lien impossible" };
+    linkId = created.id;
+  }
+  if (linkId === parsedId.data) return { ok: false, error: "Un lien ne peut pas se citer lui-même" };
+
+  const { error: relationError } = await supabase
+    .from("item_links")
+    .insert({ workspace_id: workspaceId, from_item: parsedId.data, to_item: linkId, relation: LINK_RELATION });
+  if (relationError) {
+    return {
+      ok: false,
+      error: relationError.code === "23505" ? "Ce lien est déjà attaché" : "Impossible d'attacher le lien",
+    };
+  }
+
+  refresh();
+  return { ok: true, data: { id: linkId, created: !existing } };
+}
+
+/** Détache un lien (le lien lui-même reste dans le module Liens). */
+export async function detachLink(itemId: unknown, linkId: unknown): Promise<ActionResult> {
+  const parsedItem = itemIdSchema.safeParse(itemId);
+  const parsedLink = itemIdSchema.safeParse(linkId);
+  if (!parsedItem.success || !parsedLink.success) return { ok: false, error: "Lien introuvable" };
+
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("item_links")
+    .delete()
+    .eq("workspace_id", workspaceId)
+    .eq("from_item", parsedItem.data)
+    .eq("to_item", parsedLink.data)
+    .eq("relation", LINK_RELATION);
+  if (error) return { ok: false, error: "Impossible de retirer le lien" };
 
   refresh();
   return { ok: true, data: undefined };

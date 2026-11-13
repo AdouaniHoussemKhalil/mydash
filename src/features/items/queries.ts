@@ -93,3 +93,45 @@ export async function searchItems(query: string, limit = 8): Promise<Item[]> {
   if (error) throw new Error("Recherche impossible");
   return data;
 }
+
+/** Lien attaché à un élément (Docs, Prompts, Skills). */
+export type RelatedLink = {
+  id: string;
+  title: string;
+  url: string | null;
+  faviconUrl: string | null;
+  siteName: string | null;
+};
+
+/** Relation item_links utilisée pour les liens attachés. */
+export const LINK_RELATION = "link";
+
+/** Liens attachés à un item, dans l'ordre d'ajout. */
+export async function getRelatedLinks(itemId: string): Promise<RelatedLink[]> {
+  if (!itemIdSchema.safeParse(itemId).success) return [];
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("item_links")
+    .select(
+      "created_at, target:items!item_links_to_item_workspace_id_fkey(id, title, url, link_meta(favicon_url, site_name))",
+    )
+    .eq("workspace_id", workspaceId)
+    .eq("from_item", itemId)
+    .eq("relation", LINK_RELATION)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error("Impossible de charger les liens");
+  return data.flatMap(({ target }) =>
+    target
+      ? [
+          {
+            id: target.id,
+            title: target.title,
+            url: target.url,
+            faviconUrl: target.link_meta?.favicon_url ?? null,
+            siteName: target.link_meta?.site_name ?? null,
+          },
+        ]
+      : [],
+  );
+}

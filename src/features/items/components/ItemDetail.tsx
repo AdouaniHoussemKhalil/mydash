@@ -6,9 +6,12 @@ import { getItemSpaces, ItemSpacesEditor, listSpaces } from "@/features/spaces";
 import { getItemTags, ItemTagsEditor, listTags } from "@/features/tags";
 import { getItem } from "../queries";
 import { ItemEditor } from "./ItemEditor";
+import { ItemRelatedLinks } from "./ItemRelatedLinks";
 
 /** Types dont le détail propose des pièces jointes. */
 const ATTACHMENT_TYPES = new Set(["file", "doc", "prompt", "skill"]);
+/** Types dont le détail propose des liens attachés. */
+const RELATED_LINK_TYPES = new Set(["doc", "prompt", "skill"]);
 
 /** Contenu du panneau détail : chargement serveur, édition en place côté client. */
 export async function ItemDetail({ id }: { id: string }) {
@@ -45,6 +48,11 @@ export async function ItemDetail({ id }: { id: string }) {
           {ATTACHMENT_TYPES.has(item.type) && (
             <Suspense fallback={<Skeleton className="h-28 w-full" />}>
               <ItemAttachments itemId={item.id} />
+            </Suspense>
+          )}
+          {RELATED_LINK_TYPES.has(item.type) && (
+            <Suspense fallback={<Skeleton className="h-20 w-full" />}>
+              <ItemRelatedLinks itemId={item.id} />
             </Suspense>
           )}
           <ItemTagsEditor key={`tags-${item.id}`} itemId={item.id} tags={tags} allTags={allTags} />
