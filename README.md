@@ -67,6 +67,10 @@ Sans ces valeurs, Supabase démarre quand même : seul le bouton GitHub échoue,
   - des clés étrangères composites empêchent de relier des éléments de workspaces différents.
 - `items` est la table centrale commune à tous les types. Elle contient la colonne `search_vector` (générée automatiquement, avec un index GIN) et la colonne `embedding`, réservée à la recherche sémantique.
 - Une colonne `url` (http ou https uniquement, contrôlé en base) porte l'adresse des liens. Les données propres aux liens (statut lu / à lire) sont dans `link_meta`, en relation 1-1 avec `items`.
+- **Aperçu des liens** : la route `POST /api/items/[id]/preview` lit les balises Open Graph de la page (titre, description, image, favicon) et les enregistre dans `link_meta`. Garde-fous contre le SSRF :
+  - http et https uniquement, sur les ports 80, 443, 8080 et 8443 ;
+  - adresses privées, locales et réservées refusées, y compris après redirection et au moment de la connexion (pas de contournement par DNS) ;
+  - 5 s et 512 Ko maximum, 3 redirections au plus.
 
 ## Scripts
 

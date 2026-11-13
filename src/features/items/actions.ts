@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
+import { writeLinkMeta } from "./link-meta";
 import { getActiveWorkspaceId, searchItems } from "./queries";
 import {
   type ActionResult,
@@ -82,8 +83,7 @@ export async function deleteItem(id: unknown): Promise<ActionResult> {
 }
 
 /**
- * Statut de lecture d'un lien. La ligne link_meta est créée à la première
- * utilisation : on met à jour, sinon on insère (workspace de l'item).
+ * Statut de lecture d'un lien (ligne link_meta créée à la première utilisation).
  */
 export async function setLinkRead(id: unknown, isRead: unknown): Promise<ActionResult> {
   const parsedId = itemIdSchema.safeParse(id);
@@ -92,21 +92,8 @@ export async function setLinkRead(id: unknown, isRead: unknown): Promise<ActionR
 
   const workspaceId = await getActiveWorkspaceId();
   const supabase = await createClient();
-  const { data: updated, error } = await supabase
-    .from("link_meta")
-    .update({ is_read: parsedRead.data })
-    .eq("workspace_id", workspaceId)
-    .eq("item_id", parsedId.data)
-    .select("item_id");
-  if (error) return { ok: false, error: "Enregistrement impossible. Réessaie." };
-
-  if (updated.length === 0) {
-    // La clé étrangère composite garantit que l'item est bien dans ce workspace.
-    const { error: insertError } = await supabase
-      .from("link_meta")
-      .insert({ item_id: parsedId.data, workspace_id: workspaceId, is_read: parsedRead.data });
-    if (insertError) return { ok: false, error: "Élément introuvable ou accès refusé" };
-  }
+  const written = await writeLinkMeta(supabase, workspaceId, parsedId.data, { is_read: parsedRead.data });
+  if (!written) return { ok: false, error: "Élément introuvable ou accès refusé" };
 
   refresh();
   return { ok: true, data: undefined };
