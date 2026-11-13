@@ -18,19 +18,24 @@ test("fichiers : chaque fichier déposé devient un élément avec aperçu", asy
     { name: `image-${stamp}.png`, mimeType: "image/png", buffer: PNG },
   ]);
 
-  // Le détail du dernier fichier s'ouvre, avec l'aperçu de l'image.
+  // Le détail du dernier fichier s'ouvre : vignette, « Voir » dans un nouvel onglet.
   await expect(page).toHaveURL(/\/files\?item=/, { timeout: 45_000 });
   const detail = page.getByRole("complementary", { name: /Détail/ });
   await expect(detail.getByLabel("Titre")).toHaveValue(`image-${stamp}.png`);
-  await expect(detail.getByRole("img", { name: `image-${stamp}.png` })).toBeVisible();
+  await expect(detail.locator('a[target="_blank"] img').first()).toBeVisible();
+  const view = detail.getByRole("link", { name: "Voir", exact: true });
+  await expect(view).toHaveAttribute("target", "_blank");
+  await expect(view).toHaveAttribute("href", /^\/api\/files\/[^?]+$/);
+  await expect(detail.locator("iframe")).toHaveCount(0);
 
   // La liste indique le type et la taille.
   const list = page.locator("main ul").first();
   await expect(list.getByRole("link", { name: `lisezmoi-${stamp}.txt TXT · 7 o` })).toBeVisible();
   await expect(list.getByRole("link", { name: new RegExp(`^image-${stamp}[.]png Image PNG`) })).toBeVisible();
 
-  // Sans aperçu possible : type, taille et téléchargement.
+  // Texte : « Voir » et « Télécharger », sans vignette.
   await list.getByRole("link", { name: new RegExp(`^lisezmoi-${stamp}[.]txt`) }).click();
-  await expect(detail.getByText("pas d'aperçu pour ce type")).toBeVisible();
+  await expect(detail.getByText("TXT · 7 o")).toBeVisible();
+  await expect(detail.getByRole("link", { name: "Voir", exact: true })).toHaveAttribute("target", "_blank");
   await expect(detail.getByRole("link", { name: "Télécharger", exact: true })).toHaveAttribute("href", /\/api\/files\/.+\?download=1$/);
 });

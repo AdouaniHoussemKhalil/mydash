@@ -72,6 +72,17 @@ export function fileKindLabel(name: string, mimeType: string): string {
   return family === "text" ? "Texte" : "Fichier";
 }
 
+/**
+ * Le navigateur sait l'afficher sans risque dans un onglet : images
+ * matricielles, PDF, texte brut, audio, vidéo. Pas de HTML ni de SVG
+ * (contenu actif servi par le domaine de stockage).
+ */
+export function canOpenInBrowser(mimeType: string): boolean {
+  if (previewKind(mimeType)) return true;
+  if (/^(audio|video)\/[\w.+-]+$/.test(mimeType)) return true;
+  return /^text\/(plain|markdown|csv|x-markdown)$/.test(mimeType) || mimeType === "application/json";
+}
+
 /** Aperçu possible dans le navigateur. */
 export function previewKind(mimeType: string): "image" | "pdf" | null {
   if (/^image\/(png|jpe?g|gif|webp|avif|bmp)$/.test(mimeType)) return "image";

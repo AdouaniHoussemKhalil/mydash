@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fileInfoSchema, fileKindLabel, fileNameSchema, formatBytes, previewKind } from "./schemas";
+import { canOpenInBrowser, fileInfoSchema, fileKindLabel, fileNameSchema, formatBytes, previewKind } from "./schemas";
 
 describe("fileNameSchema", () => {
   it("retire le chemin et les caractères de contrôle", () => {
@@ -48,5 +48,16 @@ describe("fileKindLabel", () => {
     expect(fileKindLabel("notes.md", "text/markdown")).toBe("MD");
     expect(fileKindLabel("LISEZMOI", "text/plain")).toBe("Texte");
     expect(fileKindLabel("x", "application/octet-stream")).toBe("Fichier");
+  });
+});
+
+describe("canOpenInBrowser", () => {
+  it("ouvre images, PDF, texte, audio et vidéo, pas le HTML ni le SVG", () => {
+    for (const type of ["image/png", "application/pdf", "text/plain", "text/markdown", "video/mp4", "audio/mpeg"]) {
+      expect(canOpenInBrowser(type)).toBe(true);
+    }
+    for (const type of ["text/html", "image/svg+xml", "application/zip", "application/octet-stream"]) {
+      expect(canOpenInBrowser(type)).toBe(false);
+    }
   });
 });
