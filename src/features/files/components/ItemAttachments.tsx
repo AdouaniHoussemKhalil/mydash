@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { listItemFiles } from "../queries";
 import { AttachmentsEditor } from "./AttachmentsEditor";
 
@@ -6,7 +7,8 @@ export async function ItemAttachments({ itemId, label }: { itemId: string; label
   let files;
   try {
     files = await listItemFiles(itemId);
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return (
       <p role="alert" className="text-sm text-danger-11">
         Impossible de charger les fichiers. Recharge la page.
