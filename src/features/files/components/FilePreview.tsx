@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/core";
 import { listItemFiles } from "../queries";
@@ -11,7 +12,8 @@ export async function FilePreview({ itemId }: { itemId: string }) {
   let files;
   try {
     files = await listItemFiles(itemId);
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return (
       <p role="alert" className="text-sm text-danger-11">
         Aperçu indisponible. Recharge la page.

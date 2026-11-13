@@ -21,6 +21,9 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.22",
+    "@fullcalendar/daygrid": "^6.1.22",
+    "@fullcalendar/react": "^6.1.22",
     "@quickadui/core": "^0.2.1",
     "@quickadui/data": "^0.2.1",
     "@quickadui/forms": "^0.2.1",

@@ -145,3 +145,26 @@ export async function getRelatedLinks(itemId: string): Promise<RelatedLink[]> {
       : [],
   );
 }
+
+/** Tâche placée sur le calendrier. */
+export type DatedTask = { id: string; title: string; status: TaskStatus; dueDate: string };
+
+/** Tâches non archivées qui ont une échéance (calendrier). */
+export async function listDatedTasks(limit = 2000): Promise<DatedTask[]> {
+  const workspaceId = await getActiveWorkspaceId();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("task_details")
+    .select("status, due_date, item:items!task_details_item_id_workspace_id_fkey!inner(id, title, archived)")
+    .eq("workspace_id", workspaceId)
+    .not("due_date", "is", null)
+    .eq("item.archived", false)
+    .order("due_date", { ascending: true })
+    .limit(limit);
+  if (error) throw new Error("Impossible de charger les tâches");
+  return data.flatMap((row) =>
+    row.item && row.due_date
+      ? [{ id: row.item.id, title: row.item.title, status: row.status, dueDate: row.due_date }]
+      : [],
+  );
+}
