@@ -29,7 +29,9 @@ test("repos : coller l'URL d'un dépôt", async ({ page }) => {
   // Modifier l'URL : seul un dépôt est accepté.
   await detail.getByLabel("URL du dépôt").fill("https://nextjs.org/docs");
   await detail.getByLabel("URL du dépôt").press("Enter");
-  await expect(detail.getByRole("alert")).toHaveText("Ce n'est pas l'URL d'un dépôt GitHub ou GitLab");
+  await expect(detail.getByRole("region", { name: "Dépôt" }).getByRole("alert")).toHaveText(
+    "Ce n'est pas l'URL d'un dépôt GitHub ou GitLab",
+  );
   await expect(open).toHaveAttribute("href", `https://github.com/mydash-e2e/${name}`);
 });
 
