@@ -1,8 +1,9 @@
-import { UserRound } from "lucide-react";
+import { FileText, UserRound } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { unstable_rethrow } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
-import { Skeleton } from "@/components/ui/core";
+import { Button, Skeleton } from "@/components/ui/core";
 import { PageHeader } from "@/components/PageHeader";
 import {
   type Entries,
@@ -24,6 +25,14 @@ export default function MePage() {
           title="Moi"
           description="Tes informations professionnelles : elles servent à générer ton CV."
           icon={<UserRound />}
+          actions={
+            <Button asChild>
+              <Link href="/me/cv">
+                <FileText className="size-4" />
+                Voir mon CV
+              </Link>
+            </Button>
+          }
         />
         <Suspense fallback={<Skeleton className="h-96 w-full" />}>
           <ProfileContent />

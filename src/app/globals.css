@@ -94,3 +94,25 @@ body {
 .mydash-calendar .fc-event.is-selected {
   box-shadow: 0 0 0 2px var(--color-accent-8);
 }
+
+/* ─────────── CV : impression A4 (Enregistrer au format PDF) ─────────── */
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: var(--color-neutral-1);
+  }
+  .cv-sheet {
+    width: 210mm;
+    /* Pas de hauteur imposée : sinon quelques pixels de trop créent une page blanche. */
+    min-height: 0;
+    margin: 0;
+    box-shadow: none;
+    /* Jauges et couleurs d'accent conservées à l'impression */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

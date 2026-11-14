@@ -6,3 +6,6 @@ export { initials, type Profile } from "./schemas";
 export { EntryListEditor } from "./components/EntryListEditor";
 export { ENTRY_KINDS, type Entries, type EntryKind } from "./entries";
 export { listEntries } from "./entries-queries";
+export { CvDocument, cvEntries } from "./components/CvDocument";
+export { ForceLightTheme } from "./components/ForceLightTheme";
+export { PrintButton } from "./components/PrintButton";
