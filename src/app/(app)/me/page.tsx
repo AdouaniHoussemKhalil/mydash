@@ -68,6 +68,9 @@ async function ProfileContent() {
       <EntryListEditor kind="skills" entries={entries.skills} />
       <EntryListEditor kind="experiences" entries={entries.experiences} />
       <EntryListEditor kind="education" entries={entries.education} />
+      <EntryListEditor kind="languages" entries={entries.languages} />
+      <EntryListEditor kind="projects" entries={entries.projects} />
+      <EntryListEditor kind="certifications" entries={entries.certifications} />
     </>
   );
 }
