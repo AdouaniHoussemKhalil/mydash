@@ -161,6 +161,104 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"profile_certifications": {
+                  Row: {
+                    "created_at": string,"id": string,"issued_on": string | null,"issuer": string,"name": string,"show_on_cv": boolean,"url": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"issued_on"?: string | null,"issuer"?: string,"name": string,"show_on_cv"?: boolean,"url"?: string | null,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"issued_on"?: string | null,"issuer"?: string,"name"?: string,"show_on_cv"?: boolean,"url"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profile_education": {
+                  Row: {
+                    "created_at": string,"degree": string,"description": string,"end_date": string | null,"id": string,"location": string,"school": string,"show_on_cv": boolean,"start_date": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"degree": string,"description"?: string,"end_date"?: string | null,"id"?: string,"location"?: string,"school"?: string,"show_on_cv"?: boolean,"start_date"?: string | null,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"degree"?: string,"description"?: string,"end_date"?: string | null,"id"?: string,"location"?: string,"school"?: string,"show_on_cv"?: boolean,"start_date"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profile_experiences": {
+                  Row: {
+                    "created_at": string,"description": string,"end_date": string | null,"id": string,"location": string,"organization": string,"show_on_cv": boolean,"start_date": string,"title": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"description"?: string,"end_date"?: string | null,"id"?: string,"location"?: string,"organization"?: string,"show_on_cv"?: boolean,"start_date": string,"title": string,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"description"?: string,"end_date"?: string | null,"id"?: string,"location"?: string,"organization"?: string,"show_on_cv"?: boolean,"start_date"?: string,"title"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profile_languages": {
+                  Row: {
+                    "created_at": string,"id": string,"level": string,"name": string,"position": number,"show_on_cv": boolean,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"level"?: string,"name": string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"level"?: string,"name"?: string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profile_projects": {
+                  Row: {
+                    "created_at": string,"description": string,"id": string,"name": string,"position": number,"show_on_cv": boolean,"url": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"description"?: string,"id"?: string,"name": string,"position"?: number,"show_on_cv"?: boolean,"url"?: string | null,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"description"?: string,"id"?: string,"name"?: string,"position"?: number,"show_on_cv"?: boolean,"url"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profile_skills": {
+                  Row: {
+                    "category": string,"created_at": string,"id": string,"level": Database["public"]['Enums']["skill_level"],"name": string,"position": number,"show_on_cv": boolean,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category"?: string,"created_at"?: string,"id"?: string,"level"?: Database["public"]['Enums']["skill_level"],"name": string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                  }
+                  Update: {
+                    "category"?: string,"created_at"?: string,"id"?: string,"level"?: Database["public"]['Enums']["skill_level"],"name"?: string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"profiles": {
+                  Row: {
+                    "contact_email": string | null,"created_at": string,"full_name": string,"github": string | null,"headline": string,"linkedin": string | null,"location": string | null,"phone": string | null,"photo_path": string | null,"summary": string,"updated_at": string,"user_id": string,"website": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "contact_email"?: string | null,"created_at"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id": string,"website"?: string | null
+                  }
+                  Update: {
+                    "contact_email"?: string | null,"created_at"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id"?: string,"website"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"repo_activity": {
                   Row: {
                     "ci_state": string | null,"created_at": string,"fetch_error": string | null,"fetched_at": string | null,"item_id": string,"open_pr_count": number | null,"snapshot": NonNullable<Json>,"updated_at": string,"workspace_id": string
@@ -296,6 +394,9 @@ isOneToOne: false
             "can_write":
 { Args: { "ws": string }; Returns: boolean
                            },
+"is_http_url":
+{ Args: { "value": string }; Returns: boolean
+                           },
 "is_member":
 { Args: { "ws": string }; Returns: boolean
                            },
@@ -310,7 +411,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "item_type": "link"|"note"|"doc"|"file"|"repo"|"tool"|"prompt"|"skill"|"snippet"|"task"|"event","member_role": "owner"|"editor"|"viewer","task_status": "todo"|"doing"|"done"
+            "item_type": "link"|"note"|"doc"|"file"|"repo"|"tool"|"prompt"|"skill"|"snippet"|"task"|"event","member_role": "owner"|"editor"|"viewer","skill_level": "debutant"|"intermediaire"|"avance"|"expert","task_status": "todo"|"doing"|"done"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -426,7 +527,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "item_type": ["link", "note", "doc", "file", "repo", "tool", "prompt", "skill", "snippet", "task", "event"],"member_role": ["owner", "editor", "viewer"],"task_status": ["todo", "doing", "done"]
+            "item_type": ["link", "note", "doc", "file", "repo", "tool", "prompt", "skill", "snippet", "task", "event"],"member_role": ["owner", "editor", "viewer"],"skill_level": ["debutant", "intermediaire", "avance", "expert"],"task_status": ["todo", "doing", "done"]
           }
         }
 } as const
