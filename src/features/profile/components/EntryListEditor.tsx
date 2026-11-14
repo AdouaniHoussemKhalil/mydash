@@ -92,8 +92,8 @@ export function EntryListEditor<K extends EntryKind>({ kind, entries }: EntryLis
         />
       )}
 
-      {list.length === 0 && editing !== "new" ? (
-        <p className="text-sm text-neutral-11">{config.empty}</p>
+      {list.length === 0 ? (
+        editing !== "new" && <p className="text-sm text-neutral-11">{config.empty}</p>
       ) : (
         groups.map((group) => (
           <div key={group.name || "all"} className="flex flex-col gap-2">
@@ -212,7 +212,7 @@ function EntryForm({ config, initial, submitLabel, pending, onSubmit, onCancel }
   };
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3 rounded-lg bg-neutral-2 p-3" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-3 rounded-lg border border-neutral-6 bg-neutral-1 p-3" noValidate>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {config.fields.map((field) => (
           <Field key={field.name} field={field} id={`${formId}-${field.name}`} values={values} set={set} />

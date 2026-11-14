@@ -66,6 +66,8 @@ async function ProfileContent() {
         <ProfileIdentityForm profile={profile} />
       </Section>
       <EntryListEditor kind="skills" entries={entries.skills} />
+      <EntryListEditor kind="experiences" entries={entries.experiences} />
+      <EntryListEditor kind="education" entries={entries.education} />
     </>
   );
 }
