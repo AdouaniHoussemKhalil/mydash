@@ -4,7 +4,15 @@ import { unstable_rethrow } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { PageHeader } from "@/components/PageHeader";
-import { getProfile, type Profile, ProfileIdentityForm, ProfilePhotoEditor } from "@/features/profile";
+import {
+  type Entries,
+  EntryListEditor,
+  getProfile,
+  listEntries,
+  type Profile,
+  ProfileIdentityForm,
+  ProfilePhotoEditor,
+} from "@/features/profile";
 
 export const metadata: Metadata = { title: "Moi" };
 
@@ -39,8 +47,9 @@ function Section({ title, description, children }: { title: string; description?
 
 async function ProfileContent() {
   let profile: Profile;
+  let entries: Entries;
   try {
-    profile = await getProfile();
+    [profile, entries] = await Promise.all([getProfile(), listEntries()]);
   } catch (error) {
     unstable_rethrow(error);
     return (
@@ -51,9 +60,12 @@ async function ProfileContent() {
   }
 
   return (
-    <Section title="Identité" description="Enregistré automatiquement à la sortie de chaque champ.">
-      <ProfilePhotoEditor hasPhoto={Boolean(profile.photo_path)} version={profile.updated_at} fullName={profile.full_name} />
-      <ProfileIdentityForm profile={profile} />
-    </Section>
+    <>
+      <Section title="Identité" description="Enregistré automatiquement à la sortie de chaque champ.">
+        <ProfilePhotoEditor hasPhoto={Boolean(profile.photo_path)} version={profile.updated_at} fullName={profile.full_name} />
+        <ProfileIdentityForm profile={profile} />
+      </Section>
+      <EntryListEditor kind="skills" entries={entries.skills} />
+    </>
   );
 }
