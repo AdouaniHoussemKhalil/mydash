@@ -8,7 +8,7 @@ import {
   toMonthInput,
 } from "../entries";
 
-export type FieldType = "text" | "textarea" | "month" | "url" | "level" | "ongoing";
+export type FieldType = "text" | "textarea" | "month" | "url" | "level" | "level-optional" | "ongoing";
 
 export type FieldConfig = {
   name: string;
@@ -111,16 +111,20 @@ export const ENTRY_CONFIG: { [K in EntryKind]: KindConfig<K> } = {
   },
   languages: {
     title: "Langues",
-    description: "Avec ton niveau (Natif, C1, courant…).",
+    description: "Avec ton niveau (Natif, C1…) et, si tu veux, une jauge pour le CV.",
     addLabel: "Ajouter une langue",
     empty: "Aucune langue pour l'instant.",
     fields: [
       { name: "name", label: "Langue", type: "text", placeholder: "ex. Anglais" },
       { name: "level", label: "Niveau", type: "text", placeholder: "ex. C1, courant" },
+      { name: "score", label: "Jauge (CV)", type: "level-optional" },
     ],
-    defaults: { name: "", level: "" },
-    toForm: (entry) => ({ name: entry.name, level: entry.level }),
-    summary: (entry) => ({ title: entry.name, meta: entry.level }),
+    defaults: { name: "", level: "", score: "" },
+    toForm: (entry) => ({ name: entry.name, level: entry.level, score: entry.score ?? "" }),
+    summary: (entry) => ({
+      title: entry.name,
+      meta: [entry.level, entry.score ? SKILL_LEVEL_LABELS[entry.score as SkillLevel] : null].filter(Boolean).join(" · ") || undefined,
+    }),
   },
   projects: {
     title: "Projets",

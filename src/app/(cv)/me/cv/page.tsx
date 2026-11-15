@@ -4,45 +4,45 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
-import { cvEntries, CvDocument, ForceLightTheme, getProfile, listEntries, PrintButton } from "@/features/profile";
+import { PageHeader } from "@/components/PageHeader";
+import { CvChooser, ForceLightTheme, getProfile, type Profile } from "@/features/profile";
 
-export const metadata: Metadata = { title: "Mon CV" };
+export const metadata: Metadata = { title: "Créer mon CV" };
 
-export default function CvPage() {
+/** Choix du modèle et de la couleur, avant de générer le CV. */
+export default function CvChoicePage() {
   return (
     <>
       <ForceLightTheme />
-      <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-6 bg-neutral-1 px-4 py-3 print:hidden">
+      <div className="border-b border-neutral-6 bg-neutral-1 px-4 py-3">
         <Link href="/me" className="inline-flex items-center gap-1.5 text-sm text-neutral-11 hover:text-neutral-12">
           <ArrowLeft className="size-4" aria-hidden />
           Retour à Moi
         </Link>
-        <div className="flex items-center gap-3">
-          <p className="hidden text-xs text-neutral-11 sm:block">Dans la fenêtre d&apos;impression : « Enregistrer au format PDF ».</p>
-          <PrintButton />
+      </div>
+      <main className="flex flex-col gap-6 px-4 py-8">
+        <div className="mx-auto w-full max-w-3xl">
+          <PageHeader title="Créer mon CV" description="Choisis un modèle et une couleur ; ton choix est retenu pour la prochaine fois." />
         </div>
-      </div>
-      <div className="overflow-x-auto px-4 py-8 print:p-0">
-        <Suspense fallback={<Skeleton className="mx-auto h-[297mm] w-[210mm]" />}>
-          <Cv />
+        <Suspense fallback={<Skeleton className="mx-auto h-96 w-full max-w-3xl" />}>
+          <Chooser />
         </Suspense>
-      </div>
+      </main>
     </>
   );
 }
 
-async function Cv() {
-  let data: [Awaited<ReturnType<typeof getProfile>>, Awaited<ReturnType<typeof listEntries>>];
+async function Chooser() {
+  let profile: Profile;
   try {
-    data = await Promise.all([getProfile(), listEntries()]);
+    profile = await getProfile();
   } catch (error) {
     unstable_rethrow(error);
     return (
       <p role="alert" className="text-center text-sm text-danger-11">
-        Impossible de générer le CV. Recharge la page.
+        Impossible de charger ton profil. Recharge la page.
       </p>
     );
   }
-  const [profile, entries] = data;
-  return <CvDocument profile={profile} entries={cvEntries(entries)} hasPhoto={Boolean(profile.photo_path)} />;
+  return <CvChooser initialTemplate={profile.cv_template as "sobre" | "colonnes"} initialColor={profile.cv_color} />;
 }

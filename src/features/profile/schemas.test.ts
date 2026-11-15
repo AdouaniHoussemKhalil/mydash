@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initials, photoInfoSchema, profilePatchSchema } from "./schemas";
+import { cvChoiceSchema, initials, isDarkColor, photoInfoSchema, profilePatchSchema } from "./schemas";
 
 describe("profilePatchSchema", () => {
   it("normalise les liens et vide → null", () => {
@@ -32,5 +32,21 @@ describe("initials", () => {
     expect(initials("Houssem Khalil Adouani")).toBe("HA");
     expect(initials("alice")).toBe("A");
     expect(initials("  ")).toBe("?");
+  });
+});
+
+describe("CV : choix et couleur", () => {
+  it("modèle connu, couleur #RRGGBB ou null", () => {
+    expect(cvChoiceSchema.parse({ template: "colonnes", color: "#4fc3e8" })).toEqual({ template: "colonnes", color: "#4FC3E8" });
+    expect(cvChoiceSchema.parse({ template: "sobre", color: null }).color).toBeNull();
+    expect(cvChoiceSchema.safeParse({ template: "fantaisie", color: null }).success).toBe(false);
+    expect(cvChoiceSchema.safeParse({ template: "sobre", color: "bleu" }).success).toBe(false);
+  });
+
+  it("détecte les couleurs sombres", () => {
+    expect(isDarkColor("#4FC3E8")).toBe(false);
+    expect(isDarkColor("#2563EB")).toBe(true);
+    expect(isDarkColor("#475569")).toBe(true);
+    expect(isDarkColor("#EA580C")).toBe(true);
   });
 });

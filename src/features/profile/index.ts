@@ -9,3 +9,7 @@ export { listEntries } from "./entries-queries";
 export { CvDocument, cvEntries } from "./components/CvDocument";
 export { ForceLightTheme } from "./components/ForceLightTheme";
 export { PrintButton } from "./components/PrintButton";
+export { saveCvChoice } from "./actions";
+export { CvChooser } from "./components/CvChooser";
+export { CvColorScope } from "./components/CvColorScope";
+export { CvColumns } from "./components/CvColumns";

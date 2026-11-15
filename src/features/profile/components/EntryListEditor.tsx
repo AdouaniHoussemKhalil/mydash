@@ -12,6 +12,8 @@ import { ENTRY_CONFIG, type FieldConfig, type FormValues, formToValues, type Kin
 
 type AnyEntry = Entry<EntryKind>;
 
+const NO_LEVEL = "aucun";
+
 export type EntryListEditorProps<K extends EntryKind> = {
   kind: K;
   entries: Entry<K>[];
@@ -253,18 +255,24 @@ function Field({
     );
   }
 
-  if (field.type === "level") {
+  if (field.type === "level" || field.type === "level-optional") {
     const labelId = `${id}-label`;
+    // Radix Select n'accepte pas "" comme valeur : « aucune » a sa propre clé.
+    const optional = field.type === "level-optional";
     return (
       <div className={className}>
         <span id={labelId} className="text-sm font-medium text-neutral-12">
           {field.label}
         </span>
-        <Select value={String(value)} onValueChange={(next) => set(field.name, next)}>
+        <Select
+          value={optional && value === "" ? NO_LEVEL : String(value)}
+          onValueChange={(next) => set(field.name, next === NO_LEVEL ? "" : next)}
+        >
           <SelectTrigger aria-labelledby={labelId}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
+            {optional && <SelectItem value={NO_LEVEL}>Aucune</SelectItem>}
             {SKILL_LEVELS.map((level) => (
               <SelectItem key={level} value={level}>
                 {SKILL_LEVEL_LABELS[level]}

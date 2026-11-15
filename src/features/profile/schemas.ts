@@ -14,11 +14,13 @@ export type Profile = Pick<
   | "linkedin"
   | "github"
   | "photo_path"
+  | "cv_template"
+  | "cv_color"
   | "updated_at"
 >;
 
 export const PROFILE_COLUMNS =
-  "full_name, headline, summary, contact_email, phone, location, website, linkedin, github, photo_path, updated_at" as const;
+  "full_name, headline, summary, contact_email, phone, location, website, linkedin, github, photo_path, cv_template, cv_color, updated_at" as const;
 
 /** Texte facultatif : vide → null. */
 const optionalText = (max: number) =>
@@ -82,4 +84,49 @@ export function initials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   const letters = parts.length > 1 ? [parts[0], parts.at(-1)] : parts.slice(0, 1);
   return letters.map((part) => part!.charAt(0).toUpperCase()).join("") || "?";
+}
+
+// ─────────────── Modèle et couleur du CV ───────────────
+
+export const CV_TEMPLATES = ["sobre", "colonnes"] as const;
+export type CvTemplate = (typeof CV_TEMPLATES)[number];
+
+export const CV_TEMPLATE_LABELS: Record<CvTemplate, { name: string; description: string }> = {
+  sobre: { name: "Sobre", description: "Une page claire, titres colorés, compétences en jauges." },
+  colonnes: { name: "Deux colonnes", description: "Colonne colorée avec photo, contact, formation et langues." },
+};
+
+/** Teintes proposées (la couleur reste libre via le sélecteur). */
+export const CV_COLOR_PRESETS = [
+  { name: "Bleu ciel", hex: "#4FC3E8" },
+  { name: "Bleu", hex: "#2563EB" },
+  { name: "Turquoise", hex: "#0D9488" },
+  { name: "Vert", hex: "#16A34A" },
+  { name: "Violet", hex: "#7C3AED" },
+  { name: "Rose", hex: "#DB2777" },
+  { name: "Orange", hex: "#EA580C" },
+  { name: "Ardoise", hex: "#475569" },
+] as const;
+
+export const cvChoiceSchema = z
+  .object({
+    template: z.enum(CV_TEMPLATES, "Modèle inconnu"),
+    color: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/, "Couleur invalide (#RRGGBB)")
+      .transform((value) => value.toUpperCase())
+      .nullable(),
+  })
+  .strict();
+export type CvChoice = z.input<typeof cvChoiceSchema>;
+
+/** Couleur sombre (texte clair par-dessus) : luminance relative WCAG < 0,4. */
+export function isDarkColor(hex: string): boolean {
+  const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!match) return false;
+  const [r, g, b] = match.slice(1).map((part) => {
+    const channel = parseInt(part, 16) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b < 0.4;
 }
