@@ -7,6 +7,8 @@ export const TOOLS = [
   { slug: "timestamp", name: "Timestamp", description: "Convertir un timestamp Unix en date, et l'inverse.", keywords: ["timestamp", "unix", "epoch", "date"] },
   { slug: "uuid", name: "UUID", description: "Générer des UUID v4 ou v7.", keywords: ["uuid", "guid", "identifiant"] },
   { slug: "cron", name: "Cron", description: "Traduire une expression cron en français, avec ses prochaines exécutions.", keywords: ["cron", "crontab", "planification", "schedule"] },
+  { slug: "diff", name: "Comparer deux textes", description: "Voir les lignes ajoutées et supprimées entre deux versions.", keywords: ["diff", "comparer", "différences"] },
+  { slug: "hash", name: "Hash", description: "Empreintes SHA-1, SHA-256 et SHA-512 d'un texte.", keywords: ["hash", "sha", "sha256", "empreinte", "checksum"] },
 ] as const;
 
 export type ToolSlug = (typeof TOOLS)[number]["slug"];
