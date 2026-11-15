@@ -9,7 +9,7 @@ import {
   SidebarNavItem,
   useSidebar,
 } from "@/components/ui/shell";
-import { Tags, UserRound } from "lucide-react";
+import { SquareTerminal, Tags, UserRound } from "lucide-react";
 import { MODULE_ICONS, NAV_ICONS } from "../icons";
 import { MODULES, PRIMARY_NAV } from "../modules";
 
@@ -103,6 +103,7 @@ export function SidebarNav({ onNavigate, spaces }: SidebarNavProps) {
 
       <SidebarGroup>
         <NavLink href="/me" label="Moi" icon={<UserRound />} onNavigate={onNavigate} />
+        <NavLink href="/toolbox" label="Boîte à outils" icon={<SquareTerminal />} onNavigate={onNavigate} />
         <NavLink href="/tags" label="Tags" icon={<Tags />} onNavigate={onNavigate} />
       </SidebarGroup>
     </SidebarContent>
