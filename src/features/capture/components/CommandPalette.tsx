@@ -1,8 +1,9 @@
 "use client";
 
-import { CornerDownLeft, Plus, Search, Tags } from "lucide-react";
+import { CornerDownLeft, Plus, Search, SquareTerminal, Tags, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
+  type ComponentType,
   type KeyboardEvent,
   type ReactNode,
   useEffect,
@@ -22,6 +23,7 @@ import {
   OPEN_CAPTURE_EVENT,
   PRIMARY_NAV,
 } from "@/features/shell";
+import { TOOL_ICONS, TOOLS } from "@/features/toolbox";
 import { cn } from "@quickadui/utils";
 import { type Capture, detectCapture } from "../detect-type";
 import { isTypingTarget, isPaletteShortcut } from "../shortcuts";
@@ -36,10 +38,16 @@ type Option = {
   run: () => void;
 };
 
-const NAV_TARGETS = [
+type NavTarget = { href: string; label: string; Icon: ComponentType; keywords?: readonly string[] };
+
+const NAV_TARGETS: NavTarget[] = [
   ...PRIMARY_NAV.map(({ href, label }) => ({ href, label, Icon: NAV_ICONS[href]! })),
   ...MODULES.map(({ slug, label }) => ({ href: `/${slug}`, label, Icon: MODULE_ICONS[slug] })),
   { href: "/tags", label: "Tags", Icon: Tags },
+  { href: "/me", label: "Moi", Icon: UserRound, keywords: ["profil", "cv"] },
+  { href: "/toolbox", label: "Boîte à outils", Icon: SquareTerminal, keywords: ["outils dev"] },
+  // Chaque outil : « jwt », « json »… l'ouvrent directement.
+  ...TOOLS.map((tool) => ({ href: `/toolbox/${tool.slug}`, label: tool.name, Icon: TOOL_ICONS[tool.slug], keywords: tool.keywords })),
 ];
 
 const SEARCH_DELAY_MS = 150;
@@ -104,7 +112,10 @@ export function CommandPalette() {
   const options = useMemo<Option[]>(() => {
     const needle = normalize(query);
     const navOptions: Option[] = NAV_TARGETS.filter(
-      (target) => !needle || normalize(target.label).includes(needle),
+      (target) =>
+        !needle ||
+        normalize(target.label).includes(needle) ||
+        (target.keywords ?? []).some((keyword) => normalize(keyword).startsWith(needle)),
     ).map((target) => ({
       id: `nav:${target.href}`,
       group: "Aller à",
