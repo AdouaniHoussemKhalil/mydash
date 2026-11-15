@@ -3,6 +3,7 @@
 import type { ComponentType } from "react";
 import type { ToolSlug } from "../tools";
 import { Base64Tool } from "./Base64Tool";
+import { CronTool } from "./CronTool";
 import { JsonTool } from "./JsonTool";
 import { JwtTool } from "./JwtTool";
 import { TimestampTool } from "./TimestampTool";
@@ -16,6 +17,7 @@ const TOOL_COMPONENTS: Record<ToolSlug, ComponentType> = {
   jwt: JwtTool,
   timestamp: TimestampTool,
   uuid: UuidTool,
+  cron: CronTool,
 };
 
 /** Outil affiché selon son slug (l'état n'est jamais conservé entre visites). */

@@ -1,4 +1,4 @@
-import { Binary, Braces, Clock, Fingerprint, KeyRound, Link2, type LucideIcon } from "lucide-react";
+import { Binary, Braces, CalendarClock, Clock, Fingerprint, KeyRound, Link2, type LucideIcon } from "lucide-react";
 import type { ToolSlug } from "./tools";
 
 export const TOOL_ICONS: Record<ToolSlug, LucideIcon> = {
@@ -8,4 +8,5 @@ export const TOOL_ICONS: Record<ToolSlug, LucideIcon> = {
   jwt: KeyRound,
   timestamp: Clock,
   uuid: Fingerprint,
+  cron: CalendarClock,
 };
