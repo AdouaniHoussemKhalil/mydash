@@ -205,14 +205,14 @@ isOneToOne: false
                   ]
                 },"profile_languages": {
                   Row: {
-                    "created_at": string,"id": string,"level": string,"name": string,"position": number,"show_on_cv": boolean,"user_id": string
+                    "created_at": string,"id": string,"level": string,"name": string,"position": number,"score": Database["public"]['Enums']["skill_level"] | null,"show_on_cv": boolean,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"level"?: string,"name": string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"level"?: string,"name": string,"position"?: number,"score"?: Database["public"]['Enums']["skill_level"] | null,"show_on_cv"?: boolean,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"level"?: string,"name"?: string,"position"?: number,"show_on_cv"?: boolean,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"level"?: string,"name"?: string,"position"?: number,"score"?: Database["public"]['Enums']["skill_level"] | null,"show_on_cv"?: boolean,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -247,14 +247,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "contact_email": string | null,"created_at": string,"full_name": string,"github": string | null,"headline": string,"linkedin": string | null,"location": string | null,"phone": string | null,"photo_path": string | null,"summary": string,"updated_at": string,"user_id": string,"website": string | null
+                    "contact_email": string | null,"created_at": string,"cv_color": string | null,"cv_template": string,"full_name": string,"github": string | null,"headline": string,"linkedin": string | null,"location": string | null,"phone": string | null,"photo_path": string | null,"summary": string,"updated_at": string,"user_id": string,"website": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "contact_email"?: string | null,"created_at"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id": string,"website"?: string | null
+                    "contact_email"?: string | null,"created_at"?: string,"cv_color"?: string | null,"cv_template"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id": string,"website"?: string | null
                   }
                   Update: {
-                    "contact_email"?: string | null,"created_at"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id"?: string,"website"?: string | null
+                    "contact_email"?: string | null,"created_at"?: string,"cv_color"?: string | null,"cv_template"?: string,"full_name"?: string,"github"?: string | null,"headline"?: string,"linkedin"?: string | null,"location"?: string | null,"phone"?: string | null,"photo_path"?: string | null,"summary"?: string,"updated_at"?: string,"user_id"?: string,"website"?: string | null
                   }
                   Relationships: [
                     

@@ -1,7 +1,7 @@
 -- Tests du profil (Moi). Lancer : npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(14);
+select plan(17);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'alice@example.test'),
@@ -27,6 +27,16 @@ select throws_ok(
 select throws_ok(
   $$update public.profiles set photo_path = '22222222-2222-2222-2222-222222222222/0b9f8a5e-2c1d-4b7a-9e3f-1a2b3c4d5e6f.png'$$,
   '23514', null, 'la photo doit être dans son propre dossier');
+
+select lives_ok(
+  $$update public.profiles set cv_template = 'colonnes', cv_color = '#4FC3E8'$$,
+  'peut choisir le modèle et la couleur du CV');
+select throws_ok(
+  $$update public.profiles set cv_color = 'bleu'$$,
+  '23514', null, 'couleur du CV : #RRGGBB seulement');
+select throws_ok(
+  $$update public.profiles set cv_template = 'fantaisie'$$,
+  '23514', null, 'modèle de CV inconnu refusé');
 
 -- ── Listes ──
 select lives_ok(
