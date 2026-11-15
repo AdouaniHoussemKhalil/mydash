@@ -111,12 +111,18 @@ export function CommandPalette() {
 
   const options = useMemo<Option[]>(() => {
     const needle = normalize(query);
+    const isExact = (target: NavTarget) =>
+      Boolean(needle) &&
+      (normalize(target.label) === needle || (target.keywords ?? []).some((keyword) => normalize(keyword) === needle));
     const navOptions: Option[] = NAV_TARGETS.filter(
       (target) =>
         !needle ||
         normalize(target.label).includes(needle) ||
         (target.keywords ?? []).some((keyword) => normalize(keyword).startsWith(needle)),
-    ).map((target) => ({
+    )
+      // Correspondance exacte (nom ou mot-clé) en tête.
+      .sort((a, b) => Number(isExact(b)) - Number(isExact(a)))
+      .map((target) => ({
       id: `nav:${target.href}`,
       group: "Aller à",
       label: target.label,
@@ -129,7 +135,7 @@ export function CommandPalette() {
 
     // « inbox » + Entrée doit ouvrir l'Inbox, pas créer une note « inbox » :
     // une page dont le nom correspond exactement passe avant la capture.
-    const exact = NAV_TARGETS.some((target) => needle && normalize(target.label) === needle);
+    const exact = NAV_TARGETS.some(isExact);
     const list: Option[] = [];
     if (capture && !exact) list.push(captureOption(capture));
     list.push(...navOptions);

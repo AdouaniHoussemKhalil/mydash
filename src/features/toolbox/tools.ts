@@ -6,6 +6,7 @@ export const TOOLS = [
   { slug: "jwt", name: "JWT", description: "Décoder un jeton : en-tête, contenu, dates d'expiration.", keywords: ["jwt", "token", "jeton", "bearer"] },
   { slug: "timestamp", name: "Timestamp", description: "Convertir un timestamp Unix en date, et l'inverse.", keywords: ["timestamp", "unix", "epoch", "date"] },
   { slug: "uuid", name: "UUID", description: "Générer des UUID v4 ou v7.", keywords: ["uuid", "guid", "identifiant"] },
+  { slug: "cron", name: "Cron", description: "Traduire une expression cron en français, avec ses prochaines exécutions.", keywords: ["cron", "crontab", "planification", "schedule"] },
 ] as const;
 
 export type ToolSlug = (typeof TOOLS)[number]["slug"];
