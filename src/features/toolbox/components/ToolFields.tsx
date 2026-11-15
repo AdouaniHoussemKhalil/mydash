@@ -66,7 +66,7 @@ export function ToolOutput({ label, value, error, rows = 10 }: ToolOutputProps) 
           rows={rows}
           spellCheck={false}
           className={cn(
-            "w-full rounded-md border border-neutral-6 bg-neutral-2 px-3 py-2 font-mono text-sm text-neutral-12 outline-none",
+            "w-full rounded-md border border-neutral-6 bg-neutral-1 px-3 py-2 font-mono text-sm text-neutral-12 outline-none",
             "focus-visible:border-accent-8 focus-visible:ring-2 focus-visible:ring-accent-8/30",
           )}
           placeholder="Le résultat s'affiche ici."
