@@ -2,9 +2,10 @@ import type { ReactNode } from "react";
 import { cn } from "@quickadui/utils";
 import { type Entries, formatMonth, formatPeriod, SKILL_LEVEL_LABELS, SKILL_LEVEL_SCORE, type SkillLevel } from "../entries";
 import { initials, type Profile } from "../schemas";
+import { CvRichText } from "./CvRichText";
 
 /** Lien affiché sans « https:// » ni « www. » : « linkedin.com/in/moi ». */
-function displayUrl(url: string): string {
+export function displayUrl(url: string): string {
   return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 }
 
@@ -22,7 +23,7 @@ function Block({ children, className }: { children: ReactNode; className?: strin
 }
 
 /** Jauge de niveau (4 cases), imprimée en couleur. */
-function Gauge({ level }: { level: SkillLevel }) {
+export function Gauge({ level }: { level: SkillLevel }) {
   const score = SKILL_LEVEL_SCORE[level];
   return (
     <span className="flex gap-0.5" role="img" aria-label={SKILL_LEVEL_LABELS[level]} title={SKILL_LEVEL_LABELS[level]}>
@@ -144,7 +145,7 @@ export function CvDocument({ profile, entries, hasPhoto }: CvDocumentProps) {
           {profile.summary && (
             <section>
               <Heading>Profil</Heading>
-              <p className="whitespace-pre-line">{profile.summary}</p>
+              <CvRichText text={profile.summary} />
             </section>
           )}
           {entries.experiences.length > 0 && (
@@ -161,7 +162,7 @@ export function CvDocument({ profile, entries, hasPhoto }: CvDocumentProps) {
                       <p className="text-[0.75rem] text-neutral-11">{formatPeriod(experience.start_date, experience.end_date)}</p>
                     </div>
                     {experience.location && <p className="text-[0.75rem] text-neutral-11">{experience.location}</p>}
-                    {experience.description && <p className="mt-0.5 whitespace-pre-line">{experience.description}</p>}
+                    {experience.description && <CvRichText text={experience.description} className="mt-0.5" />}
                   </Block>
                 ))}
               </div>
@@ -181,7 +182,7 @@ export function CvDocument({ profile, entries, hasPhoto }: CvDocumentProps) {
                       <p className="text-[0.75rem] text-neutral-11">{formatPeriod(education.start_date, education.end_date, "en cours")}</p>
                     </div>
                     {education.location && <p className="text-[0.75rem] text-neutral-11">{education.location}</p>}
-                    {education.description && <p className="mt-0.5 whitespace-pre-line">{education.description}</p>}
+                    {education.description && <CvRichText text={education.description} className="mt-0.5" />}
                   </Block>
                 ))}
               </div>
@@ -201,7 +202,7 @@ export function CvDocument({ profile, entries, hasPhoto }: CvDocumentProps) {
                         </a>
                       )}
                     </p>
-                    {project.description && <p className="whitespace-pre-line">{project.description}</p>}
+                    {project.description && <CvRichText text={project.description} />}
                   </Block>
                 ))}
               </div>

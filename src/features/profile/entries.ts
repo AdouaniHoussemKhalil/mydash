@@ -116,7 +116,17 @@ export const ENTRY_SCHEMAS = {
     .strict()
     .refine(datesInOrder, DATES_MESSAGE),
   languages: z
-    .object({ name: required(60, "Langue"), level: text(60, "Niveau").default(""), show_on_cv: showOnCv })
+    .object({
+      name: required(60, "Langue"),
+      level: text(60, "Niveau").default(""),
+      // Jauge facultative (vide → aucune).
+      score: z
+        .union([z.enum(SKILL_LEVELS), z.literal("")])
+        .transform((value) => (value === "" ? null : value))
+        .nullable()
+        .default(null),
+      show_on_cv: showOnCv,
+    })
     .strict(),
   projects: z
     .object({

@@ -4,7 +4,7 @@ import { refresh } from "next/cache";
 import { getCurrentUser } from "@/features/auth";
 import { type ActionResult, firstIssue } from "@/lib/action-result";
 import { createClient } from "@/lib/supabase/server";
-import { PHOTO_BUCKET, PHOTO_TYPES, photoInfoSchema, profilePatchSchema } from "./schemas";
+import { cvChoiceSchema, PHOTO_BUCKET, PHOTO_TYPES, photoInfoSchema, profilePatchSchema } from "./schemas";
 
 /** Modifie un ou plusieurs champs de l'identité. */
 export async function updateProfile(patch: unknown): Promise<ActionResult<{ updated_at: string }>> {
@@ -71,5 +71,19 @@ export async function removeProfilePhoto(): Promise<ActionResult> {
   if (profile?.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([profile.photo_path]);
 
   refresh();
+  return { ok: true, data: undefined };
+}
+
+/** Modèle et couleur du CV (retenus pour la fois suivante). */
+export async function saveCvChoice(choice: unknown): Promise<ActionResult> {
+  const parsed = cvChoiceSchema.safeParse(choice);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const user = await getCurrentUser();
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ cv_template: parsed.data.template, cv_color: parsed.data.color })
+    .eq("user_id", user.id);
+  if (error) return { ok: false, error: "Enregistrement impossible. Réessaie." };
   return { ok: true, data: undefined };
 }
