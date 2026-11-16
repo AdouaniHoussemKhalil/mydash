@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { isPublicPath, safeNextPath } from "./paths";
 
 describe("isPublicPath", () => {
-  it.each(["/login", "/auth/callback", "/auth/confirm"])("%s est public", (path) => {
+  it.each(["/login", "/auth/callback", "/auth/confirm", "/api/health"])("%s est public", (path) => {
     expect(isPublicPath(path)).toBe(true);
   });
 
-  it.each(["/", "/inbox", "/login-bis", "/authx"])("%s est protégé", (path) => {
+  it.each(["/", "/inbox", "/login-bis", "/authx", "/api/health/x", "/api/files/1"])("%s est protégé", (path) => {
     expect(isPublicPath(path)).toBe(false);
   });
 });

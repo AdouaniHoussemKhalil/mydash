@@ -2,8 +2,11 @@ export const LOGIN_PATH = "/login";
 /** Page d'arrivée après connexion. */
 export const HOME_PATH = "/today";
 
+/** Health check de l'hébergeur (Render) : sans session. */
+export const HEALTH_PATH = "/api/health";
+
 /** Préfixes accessibles sans session. */
-const PUBLIC_PREFIXES = [LOGIN_PATH, "/auth/"];
+const PUBLIC_PREFIXES = [LOGIN_PATH, "/auth/", HEALTH_PATH];
 
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((prefix) =>
