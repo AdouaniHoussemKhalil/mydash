@@ -12,7 +12,10 @@ import { TimestampTool } from "./TimestampTool";
 import { UrlTool } from "./UrlTool";
 import { UuidTool } from "./UuidTool";
 
-const TOOL_COMPONENTS: Record<ToolSlug, ComponentType> = {
+/** Outils purement navigateur (le presse-papiers partagé est chargé côté serveur). */
+export type BrowserToolSlug = Exclude<ToolSlug, "clipboard">;
+
+const TOOL_COMPONENTS: Record<BrowserToolSlug, ComponentType> = {
   json: JsonTool,
   base64: Base64Tool,
   url: UrlTool,
@@ -25,7 +28,7 @@ const TOOL_COMPONENTS: Record<ToolSlug, ComponentType> = {
 };
 
 /** Outil affiché selon son slug (l'état n'est jamais conservé entre visites). */
-export function ToolView({ slug }: { slug: ToolSlug }) {
+export function ToolView({ slug }: { slug: BrowserToolSlug }) {
   const Tool = TOOL_COMPONENTS[slug];
   return <Tool />;
 }
