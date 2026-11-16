@@ -1,0 +1,32 @@
+# Blueprint Render : https://render.com/docs/blueprint-spec
+# Les valeurs des variables (sync: false) se saisissent dans le tableau de
+# bord Render, jamais ici.
+services:
+  - type: web
+    name: mydash
+    runtime: node
+    # free : s'endort après 15 min sans visite (réveil 30-60 s) ; starter : toujours allumé.
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    # Déploie seulement quand la CI GitHub est verte sur main.
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      # Publiques (intégrées au build) : URL et clé publishable du projet Supabase.
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      # URL publique de l'app, ex. https://mydash.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      # Facultatif, serveur uniquement : activité GitHub des repos privés.
+      - key: GITHUB_TOKEN
+        sync: false
