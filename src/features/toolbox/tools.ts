@@ -1,5 +1,11 @@
 /** Outils de la boîte à outils (ordre d'affichage). */
 export const TOOLS = [
+  {
+    slug: "clipboard",
+    name: "Presse-papiers partagé",
+    description: "Coller un texte ici pour le copier depuis une autre machine.",
+    keywords: ["presse-papiers", "clipboard", "copier", "coller", "partager", "machine"],
+  },
   { slug: "json", name: "JSON", description: "Formater, minifier et valider du JSON.", keywords: ["json", "formater", "minifier", "valider"] },
   { slug: "base64", name: "Base64", description: "Encoder et décoder du Base64 (UTF-8, variante URL).", keywords: ["base64", "encoder", "décoder"] },
   { slug: "url", name: "Encodage d'URL", description: "Encoder et décoder les caractères spéciaux d'une URL.", keywords: ["url", "encoder", "percent", "uri"] },

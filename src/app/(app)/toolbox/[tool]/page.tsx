@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { PageHeader } from "@/components/PageHeader";
 import { getTool, TOOL_ICONS, TOOLS, ToolView } from "@/features/toolbox";
+import { ClipboardTool } from "@/features/toolbox/server";
 
 export function generateStaticParams() {
   return TOOLS.map(({ slug }) => ({ tool: slug }));
@@ -41,7 +42,7 @@ async function Tool({ params }: Pick<PageProps<"/toolbox/[tool]">, "params">) {
   return (
     <>
       <PageHeader title={tool.name} description={tool.description} icon={<Icon />} />
-      <ToolView slug={tool.slug} />
+      {tool.slug === "clipboard" ? <ClipboardTool /> : <ToolView slug={tool.slug} />}
     </>
   );
 }
