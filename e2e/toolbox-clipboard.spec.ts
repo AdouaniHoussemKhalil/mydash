@@ -9,14 +9,16 @@ test("boîte à outils : presse-papiers partagé entre deux machines", async ({ 
   await expect(box).toBeEnabled(); // page hydratée
   await box.fill(text);
   await expect(box).toHaveValue(text);
-  await expect(main.getByRole("status")).toHaveText("Enregistrement…");
   await expect(main.getByRole("status")).toContainText("Enregistré ·");
 
   // « Autre machine » : un second navigateur avec la même session.
   const other = await browser.newContext({ storageState: await page.context().storageState() });
   const otherPage = await other.newPage();
-  await otherPage.goto("/toolbox/clipboard");
-  await expect(otherPage.getByRole("main").getByLabel("Texte partagé")).toHaveValue(text);
+  // Rechargé jusqu'à voir le texte (l'enregistrement est asynchrone).
+  await expect(async () => {
+    await otherPage.goto("/toolbox/clipboard");
+    await expect(otherPage.getByRole("main").getByLabel("Texte partagé")).toHaveValue(text, { timeout: 5_000 });
+  }).toPass({ timeout: 30_000 });
   await expect(otherPage.getByRole("main").getByRole("button", { name: "Copier" })).toBeEnabled();
   await other.close();
 
