@@ -5,7 +5,7 @@ import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
 import { PageHeader } from "@/components/PageHeader";
-import { CvChooser, ForceLightTheme, getProfile, type Profile } from "@/features/profile";
+import { CvChooser, ForceLightTheme, getProfile, isCvTemplate, type Profile } from "@/features/profile";
 
 export const metadata: Metadata = { title: "Créer mon CV" };
 
@@ -44,5 +44,5 @@ async function Chooser() {
       </p>
     );
   }
-  return <CvChooser initialTemplate={profile.cv_template as "sobre" | "colonnes"} initialColor={profile.cv_color} />;
+  return <CvChooser initialTemplate={isCvTemplate(profile.cv_template) ? profile.cv_template : "sobre"} initialColor={profile.cv_color} />;
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/core";
-import { CvColorScope, CvColumns, cvEntries, CvDocument, ForceLightTheme, getProfile, listEntries, PrintButton } from "@/features/profile";
+import { CvColorScope, CvColumns, cvEntries, CvDocument, CvSimple, ForceLightTheme, getProfile, listEntries, PrintButton } from "@/features/profile";
 
 export const metadata: Metadata = { title: "Mon CV" };
 
@@ -52,7 +52,13 @@ async function Cv() {
   const props = { profile, entries: cvEntries(entries), hasPhoto: Boolean(profile.photo_path) };
   return (
     <CvColorScope color={profile.cv_color}>
-      {profile.cv_template === "colonnes" ? <CvColumns {...props} /> : <CvDocument {...props} />}
+      {profile.cv_template === "colonnes" ? (
+        <CvColumns {...props} />
+      ) : profile.cv_template === "simple" ? (
+        <CvSimple profile={profile} entries={props.entries} />
+      ) : (
+        <CvDocument {...props} />
+      )}
     </CvColorScope>
   );
 }

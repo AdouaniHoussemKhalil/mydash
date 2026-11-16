@@ -88,13 +88,18 @@ export function initials(fullName: string): string {
 
 // ─────────────── Modèle et couleur du CV ───────────────
 
-export const CV_TEMPLATES = ["sobre", "colonnes"] as const;
+export const CV_TEMPLATES = ["sobre", "colonnes", "simple"] as const;
 export type CvTemplate = (typeof CV_TEMPLATES)[number];
 
 export const CV_TEMPLATE_LABELS: Record<CvTemplate, { name: string; description: string }> = {
   sobre: { name: "Sobre", description: "Une page claire, titres colorés, compétences en jauges." },
   colonnes: { name: "Deux colonnes", description: "Colonne colorée avec photo, contact, formation et langues." },
+  simple: { name: "Simple", description: "Une colonne, sans photo, compétences listées sans niveau." },
 };
+
+export function isCvTemplate(value: string): value is CvTemplate {
+  return (CV_TEMPLATES as readonly string[]).includes(value);
+}
 
 /** Teintes proposées (la couleur reste libre via le sélecteur). */
 export const CV_COLOR_PRESETS = [
