@@ -105,6 +105,50 @@ Prérequis : Supabase local démarré (`npm run db:start`), `.env.local` rempli 
 
 La CI les exécute dans le job `e2e`, avec un Supabase allégé (base, auth, API, stockage).
 
+## Déploiement (Render + Supabase hébergé)
+
+La production tourne sur **Render** (service web Node, décrit dans [`render.yaml`](render.yaml)) avec un projet **Supabase** hébergé. `main` est la branche de production : Render déploie automatiquement quand la CI est verte sur `main` (`autoDeployTrigger: checksPass`).
+
+### 1. Supabase (supabase.com)
+
+1. Créer un projet, de préférence dans la région de Francfort, comme le service Render. Garder le mot de passe de la base dans un gestionnaire de mots de passe.
+2. Appliquer les migrations :
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <ref>
+   npx supabase db push
+   ```
+   Les migrations créent aussi les espaces de stockage `files` et `avatars`.
+3. **Project Settings → API** : relever la *Project URL* et la *publishable key*. Elles ne sont pas secrètes : elles finissent dans le navigateur.
+4. **Authentication → URL Configuration** :
+   - *Site URL* : `https://<app>.onrender.com` ;
+   - *Redirect URLs* : `https://<app>.onrender.com/auth/callback`.
+5. **Authentication → Providers → Email** : mot de passe de 10 caractères minimum. La confirmation par e-mail est conseillée en production. Le service d'e-mail intégré à Supabase est limité à quelques messages par heure : il suffit pour un usage personnel.
+6. **Connexion GitHub** (facultatif) :
+   - créer une OAuth App de production avec comme *Homepage* `https://<app>.onrender.com` et comme *callback* `https://<ref>.supabase.co/auth/v1/callback` ;
+   - coller son Client ID et son secret dans **Authentication → Providers → GitHub**.
+
+### 2. Render (render.com)
+
+1. **New → Blueprint** et choisir ce dépôt : `render.yaml` crée le service `mydash`.
+2. Renseigner les variables :
+
+| Variable | Valeur | Remarque |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | Intégrée au build |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Intégrée au build |
+| `NEXT_PUBLIC_SITE_URL` | `https://<app>.onrender.com` | Retours de connexion |
+| `GITHUB_TOKEN` | jeton *fine-grained* en lecture seule | Facultatif : dépôts privés |
+
+3. Choisir le plan :
+   - `free` s'endort après 15 minutes sans visite, et la visite suivante attend de 30 à 60 secondes ;
+   - `starter` reste toujours allumé.
+4. Le health check `GET /api/health` doit répondre `{"status":"ok"}`.
+
+### 3. Mettre en production
+
+Ouvrir une PR `develop` → `main` (release), puis la merger : la CI tourne sur `main`, puis Render déploie. Une nouvelle migration s'applique avec `npx supabase db push`, **avant** de merger la release qui en dépend.
+
 ## Raccourcis clavier
 
 | Touche | Action |
