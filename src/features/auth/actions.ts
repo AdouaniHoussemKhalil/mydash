@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { publicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
-import { authErrorMessage } from "./errors";
+import { authErrorMessage, logUnknownAuthError } from "./errors";
 import { HOME_PATH, LOGIN_PATH, safeNextPath } from "./paths";
 import { authModeSchema, credentialsSchema } from "./schemas";
 
@@ -31,7 +31,10 @@ export async function authenticateWithPassword(
 
   if (parsedMode.data === "sign-in") {
     const { error } = await supabase.auth.signInWithPassword(parsed.data);
-    if (error) return { ok: false, error: authErrorMessage(error.code) };
+    if (error) {
+      logUnknownAuthError("connexion", error);
+      return { ok: false, error: authErrorMessage(error) };
+    }
     redirect(nextPath);
   }
 
@@ -39,7 +42,10 @@ export async function authenticateWithPassword(
     ...parsed.data,
     options: { emailRedirectTo: callbackUrl(nextPath) },
   });
-  if (error) return { ok: false, error: authErrorMessage(error.code) };
+  if (error) {
+    logUnknownAuthError("inscription", error);
+    return { ok: false, error: authErrorMessage(error) };
+  }
   // Confirmation d'e-mail désactivée : la session existe déjà.
   if (data.session) redirect(nextPath);
   return { ok: true, message: "Compte créé. Ouvre le lien reçu par e-mail pour l'activer." };
@@ -56,7 +62,10 @@ export async function signInWithGitHub(formData: FormData): Promise<void> {
       scopes: "read:user user:email",
     },
   });
-  if (error || !data.url) redirect(`${LOGIN_PATH}?error=oauth`);
+  if (error || !data.url) {
+    if (error) logUnknownAuthError("GitHub", error);
+    redirect(`${LOGIN_PATH}?error=oauth`);
+  }
   redirect(data.url);
 }
 
