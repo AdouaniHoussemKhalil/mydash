@@ -1,15 +1,15 @@
 import { unstable_rethrow } from "next/navigation";
-import { CalendarDays } from "lucide-react";
-import Link from "next/link";
-import { EmptyState } from "@/components/EmptyState";
 import { type DatedTask, listDatedTasks } from "@/features/items";
+import { listCalendarNotes } from "../queries";
+import type { CalendarNote } from "../schemas";
 import { TaskCalendar } from "./TaskCalendar";
 
-/** Contenu de la page Calendrier : tâches à échéance, chargées côté serveur. */
+/** Contenu de la page Calendrier : tâches à échéance et notes, chargées côté serveur. */
 export async function CalendarContent({ selectedId }: { selectedId: string | undefined }) {
   let tasks: DatedTask[];
+  let notes: CalendarNote[];
   try {
-    tasks = await listDatedTasks();
+    [tasks, notes] = await Promise.all([listDatedTasks(), listCalendarNotes()]);
   } catch (error) {
     // Interruptions internes de Next (prérendu, redirection) : à laisser passer.
     unstable_rethrow(error);
@@ -21,21 +21,11 @@ export async function CalendarContent({ selectedId }: { selectedId: string | und
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {tasks.length === 0 && (
-        <EmptyState
-          className="py-6"
-          icon={<CalendarDays />}
-          title="Aucune tâche avec échéance"
-          description="Donne une échéance à une tâche pour la voir ici."
-          action={
-            <Link href="/tasks" className="text-sm text-accent-11 hover:underline">
-              Aller aux tâches
-            </Link>
-          }
-        />
-      )}
-      <TaskCalendar tasks={tasks} selectedId={selectedId} />
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-neutral-11">
+        Survole un jour et clique sur « + » pour y écrire une note. Les tâches avec échéance s&apos;affichent aussi.
+      </p>
+      <TaskCalendar tasks={tasks} notes={notes} selectedId={selectedId} />
     </div>
   );
 }
