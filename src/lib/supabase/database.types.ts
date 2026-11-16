@@ -5,7 +5,27 @@ export type Database = {
   
   "public": {
           Tables: {
-            "item_files": {
+            "calendar_notes": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"day": string,"id": string,"text": string,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"day": string,"id"?: string,"text": string,"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"day"?: string,"id"?: string,"text"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "calendar_notes_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"item_files": {
                   Row: {
                     "created_at": string,"created_by": string | null,"id": string,"item_id": string,"mime_type": string,"name": string,"size_bytes": number,"storage_path": string,"workspace_id": string
                   }

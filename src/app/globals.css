@@ -91,6 +91,50 @@ body {
 .mydash-calendar .fc-event.task-done .fc-event-title {
   text-decoration: line-through;
 }
+/* « + » d'un jour : visible au survol du carreau, au clavier et sur écran tactile. */
+.mydash-calendar .fc .fc-daygrid-day-top {
+  flex-direction: row;
+}
+.mydash-calendar .fc .fc-daygrid-day-number {
+  width: 100%;
+}
+.mydash-calendar .calendar-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 9999px;
+  color: var(--color-accent-11);
+  opacity: 0;
+  transition: opacity 120ms, background-color 120ms;
+}
+.mydash-calendar .calendar-add svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+.mydash-calendar .calendar-day:hover .calendar-add,
+.mydash-calendar .calendar-add:focus-visible {
+  opacity: 1;
+}
+.mydash-calendar .calendar-add:hover {
+  background-color: var(--color-accent-4);
+}
+.mydash-calendar .calendar-add:focus-visible {
+  outline: 2px solid var(--color-accent-8);
+}
+@media (hover: none) {
+  .mydash-calendar .calendar-add {
+    opacity: 1;
+  }
+}
+/* Notes du calendrier : distinctes des tâches. */
+.mydash-calendar .fc-event.calendar-note {
+  background-color: var(--color-neutral-2);
+  border-color: var(--color-neutral-7);
+  border-left: 3px solid var(--color-accent-9);
+  --fc-event-text-color: var(--color-neutral-12);
+}
 .mydash-calendar .fc-event.is-selected {
   box-shadow: 0 0 0 2px var(--color-accent-8);
 }
