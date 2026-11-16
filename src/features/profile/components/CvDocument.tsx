@@ -9,7 +9,7 @@ export function displayUrl(url: string): string {
   return url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 }
 
-function Heading({ children }: { children: ReactNode }) {
+export function Heading({ children }: { children: ReactNode }) {
   return (
     <h2 className="mb-2 border-b border-accent-7 pb-1 text-[0.8rem] font-semibold tracking-[0.12em] text-accent-11 uppercase">
       {children}
@@ -17,7 +17,7 @@ function Heading({ children }: { children: ReactNode }) {
   );
 }
 
-function Block({ children, className }: { children: ReactNode; className?: string }) {
+export function Block({ children, className }: { children: ReactNode; className?: string }) {
   // Une entrée n'est jamais coupée entre deux pages.
   return <div className={cn("break-inside-avoid", className)}>{children}</div>;
 }

@@ -305,6 +305,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"shared_clipboard": {
+                  Row: {
+                    "text": string,"updated_at": string,"updated_by": string | null,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "text"?: string,"updated_at"?: string,"updated_by"?: string | null,"workspace_id": string
+                  }
+                  Update: {
+                    "text"?: string,"updated_at"?: string,"updated_by"?: string | null,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "shared_clipboard_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: true
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"spaces": {
                   Row: {
                     "color": string | null,"created_at": string,"icon": string | null,"id": string,"name": string,"position": number,"updated_at": string,"workspace_id": string

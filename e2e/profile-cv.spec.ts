@@ -51,3 +51,25 @@ test("moi : modèle Deux colonnes et couleur, retenus au retour", async ({ page 
   await expect(page.getByRole("radio", { name: /Deux colonnes/ })).toHaveAttribute("aria-checked", "true");
   await expect(page.getByRole("radio", { name: "Bleu ciel" })).toHaveAttribute("aria-checked", "true");
 });
+
+test("moi : modèle Simple, sans photo ni niveaux de compétences", async ({ page }) => {
+  const skill = `Simple ${Date.now()}`;
+  await page.goto("/me");
+  const skills = page.getByRole("region", { name: "Compétences" });
+  await skills.getByRole("button", { name: "Ajouter une compétence" }).click();
+  await skills.getByLabel("Compétence").fill(skill);
+  await skills.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(skills.getByText(skill, { exact: true })).toBeVisible();
+
+  await page.goto("/me/cv");
+  await page.getByRole("radio", { name: /Simple/ }).click();
+  await page.getByRole("button", { name: "Générer le CV" }).click();
+  await expect(page).toHaveURL(/\/me\/cv\/apercu$/);
+  const cv = page.locator(".cv-sheet");
+  await expect(cv.getByRole("region", { name: "Compétences" })).toContainText(skill);
+  // Ni photo, ni initiales, ni jauge de niveau, ni colonne latérale.
+  await expect(cv.locator("img, [role=img], aside")).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Changer de modèle" }).click();
+  await expect(page.getByRole("radio", { name: /Simple/ })).toHaveAttribute("aria-checked", "true");
+});

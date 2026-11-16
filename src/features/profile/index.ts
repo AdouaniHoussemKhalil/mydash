@@ -13,3 +13,5 @@ export { saveCvChoice } from "./actions";
 export { CvChooser } from "./components/CvChooser";
 export { CvColorScope } from "./components/CvColorScope";
 export { CvColumns } from "./components/CvColumns";
+export { CvSimple } from "./components/CvSimple";
+export { isCvTemplate } from "./schemas";

@@ -11,6 +11,26 @@ import { CvColorScope } from "./CvColorScope";
 
 /** Miniature schématique d'un modèle (aux couleurs choisies). */
 function TemplateThumbnail({ template }: { template: CvTemplate }) {
+  if (template === "simple") {
+    return (
+      <div className="flex h-40 flex-col gap-2 overflow-hidden rounded-md border border-neutral-6 bg-neutral-1 p-3">
+        <div className="flex flex-col gap-1 border-b-2 border-accent-9 pb-2">
+          <span className="h-2 w-24 rounded bg-neutral-12" />
+          <span className="h-1.5 w-16 rounded bg-accent-9" />
+        </div>
+        {[0, 1].map((section) => (
+          <div key={section} className="flex flex-col gap-1.5">
+            <span className="h-1 w-1/3 rounded bg-accent-7" />
+            {[0, 1].map((line) => (
+              <span key={line} className="h-1 w-full rounded bg-neutral-6" />
+            ))}
+          </div>
+        ))}
+        <span className="h-1 w-1/3 rounded bg-accent-7" />
+        <span className="h-1 w-4/5 rounded bg-neutral-6" />
+      </div>
+    );
+  }
   if (template === "colonnes") {
     return (
       <div className="grid h-40 grid-cols-[38%_1fr] overflow-hidden rounded-md border border-neutral-6 bg-neutral-1">
@@ -105,7 +125,7 @@ export function CvChooser({ initialTemplate, initialColor }: CvChooserProps) {
         <h2 id={templateLabel} className="text-base font-semibold text-neutral-12">
           1. Modèle
         </h2>
-        <div role="radiogroup" aria-labelledby={templateLabel} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div role="radiogroup" aria-labelledby={templateLabel} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {CV_TEMPLATES.map((option) => {
             const selected = option === template;
             return (
