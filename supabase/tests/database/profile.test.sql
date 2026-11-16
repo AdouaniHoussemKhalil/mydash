@@ -1,7 +1,7 @@
 -- Tests du profil (Moi). Lancer : npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'alice@example.test'),
@@ -31,6 +31,9 @@ select throws_ok(
 select lives_ok(
   $$update public.profiles set cv_template = 'colonnes', cv_color = '#4FC3E8'$$,
   'peut choisir le modèle et la couleur du CV');
+select lives_ok(
+  $$update public.profiles set cv_template = 'simple'$$,
+  'peut choisir le modèle « Simple »');
 select throws_ok(
   $$update public.profiles set cv_color = 'bleu'$$,
   '23514', null, 'couleur du CV : #RRGGBB seulement');
